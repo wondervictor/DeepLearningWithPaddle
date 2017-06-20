@@ -29,7 +29,7 @@ import paddle.trainer_config_helpers as paddle
     LeNet
 """
 
-is_predict=paddle.get_config_arg('is_predict', bool, False)
+is_predict=get_config_arg('is_predict', bool, False)
 
 process = 'process'
 
@@ -61,5 +61,43 @@ paddle.settings(
     regularization=paddle.L2Regularization(1e-4),
     gradient_clipping_threshold=20
 )
+
+
+image = paddle.data_layer(name='image', size=784)
+
+conv_1 = paddle.img_conv_layer(input=image,
+                               padding=1,
+                               stride=1,
+                               num_channels=1,
+                               num_filters=6,
+                               filter_size=5,
+                               act=paddle.LinearActivation())
+
+pool_1 = paddle.img_pool_layer(input=conv_1,
+                               stride=2,
+                               pool_size=2,
+                               pool_type=paddle.MaxPooling())
+
+conv_2 = paddle.img_conv_layer(input=pool_1,
+                               stride=1,
+                               num_filters=16,
+                               filter_size=5,
+                               act=paddle.LinearActivation()
+                               )
+pool_2 = paddle.img_pool_layer(input=conv_2,
+                               stride=2,
+                               pool_size=2,
+                               pool_type=paddle.MaxPooling())
+
+#conv_3 = paddle.img_conv_layer(input=pool_2)
+
+fc_1 = paddle.fc_layer(input=pool_2, size=500, act=paddle.SigmoidActivation())
+fc_2 = paddle.fc_layer(input=fc_1, size=10, act=paddle.SoftmaxActivation())
+
+label = paddle.data_layer(name='label', size=10)
+
+cost = paddle.classification_cost(input=fc_2, label=label)
+
+paddle.outputs(cost)
 
 
