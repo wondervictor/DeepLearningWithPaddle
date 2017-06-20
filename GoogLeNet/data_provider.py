@@ -28,4 +28,22 @@ SOFTWARE.
 CIFAR-100
 """
 
+import cPickle as pickle
+import numpy as np
+import os
 
+# train 50000
+# test 10000
+
+
+def data_reader(path, n):
+    def reader():
+        with open(path, 'r') as f:
+            datadict = pickle.load(f)
+            X = datadict['data']
+            Y = datadict['fine_labels']
+            X = X.reshape(n, 3072).astype("float")
+            Y = np.array(Y)
+            for i in range(n):
+                yield X[i] / 255.0, int(Y[i])
+    return reader
