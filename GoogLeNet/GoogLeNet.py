@@ -115,7 +115,6 @@ def inception_result(name, input, filters):
     return fc
 
 
-
 image = paddle.layer.data(name='image', type=paddle.data_type.dense_vector(image_size))
 label = paddle.layer.data(name='label', type=paddle.data_type.dense_vector(class_num))
 
@@ -133,7 +132,7 @@ conv_1 = paddle.layer.img_conv(input=image,
 pool_1 = paddle.layer.img_pool(input=conv_1,
                                name='pool_1',
                                pool_size=3,
-                               stride=2,
+                               stride=1,
                                pool_type=paddle.MaxPool())
 
 conv_2 = paddle.layer.img_conv(input=image,
