@@ -19,3 +19,74 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+import paddle.v2 as paddle
+import data_provider
+import sys
+import gzip
+
+paddle.init(use_gpu=False, trainer_count=2)
+
+image_dim = 28*28
+class_dim = 10
+
+image = paddle.layer.data(name='image', type=paddle.data_type.dense_vector(image_dim))
+
+# fully connected hidden layers
+
+fc_1 = paddle.layer.fc(input=image, size=784, act=paddle.activation.Sigmoid())
+
+fc_2 = paddle.layer.fc(input=fc_1, size=256, act=paddle.activation.Sigmoid())
+
+fc_3 = paddle.layer.fc(input=fc_2, size=64, act=paddle.activation.Sigmoid())
+
+
+# output
+
+output_layer = paddle.layer.fc(input=fc_3, size=class_dim, act=paddle.activation.Softmax())
+
+
+# cost
+label = paddle.layer.data(name='label', type=paddle.data_type.integer_value(class_dim))
+cost = paddle.layer.classification_cost(input=output_layer, label=label)
+
+parameters = paddle.parameters.create(cost)
+
+print parameters.keys()
+
+momentum_optimizer = paddle.optimizer.Momentum(
+    momentum=0.9,
+    regularization=paddle.optimizer.L2Regularization(rate=0.0002 * 128),
+    learning_rate=0.1 / 128.0,
+    learning_rate_decay_a=0.1,
+    learning_rate_decay_b=50000 * 100,
+    learning_rate_schedule='discexp')
+
+trainer = paddle.trainer.SGD(cost=cost, parameters=parameters, update_equation=momentum_optimizer)
+
+reader = data_provider.create_reader('train', 60000)
+
+feeding = {'image': 0,
+           'label': 1}
+
+
+def event_handler(event):
+    if isinstance(event, paddle.event.EndIteration):
+        if event.batch_id % 100 == 0:
+            print "\nPass %d, Batch %d, Cost %f, %s" % (
+                event.pass_id, event.batch_id, event.cost, event.metrics)
+        else:
+            sys.stdout.write('.')
+            sys.stdout.flush()
+    if isinstance(event, paddle.event.EndPass):
+        # save parameters
+        with gzip.open('params_pass_%d.tar.gz' % event.pass_id, 'w') as f:
+            parameters.to_tar(f)
+        test_reader = data_provider.create_reader('test', 10000)
+
+        result = trainer.test(paddle.batch(reader=test_reader, batch_size=128), feeding=feeding)
+        print "\nTest with Pass %d, %s" % (event.pass_id, result.metrics)
+
+trainer.train(reader=paddle.batch(reader=reader, batch_size=16),
+              num_passes=100,
+              event_handler=event_handler,
+              feeding=feeding)
