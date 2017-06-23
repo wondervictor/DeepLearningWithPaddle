@@ -23,62 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 from paddle.trainer.PyDataProvider2 import *
-import numpy as np
-import struct
-import matplotlib.pyplot as plt
-
-
-def read_image_files(filename, num):
-    bin_file = open(filename, 'rb')
-    buf = bin_file.read()
-    index = 0
-    # 前四个32位integer为以下参数
-    # >IIII 表示使用大端法读取
-    magic, numImage, numRows, numCols = struct.unpack_from('>IIII', buf, index)
-    index += struct.calcsize('>IIII')
-
-    image_sets = []
-    for i in range(num):
-        images = struct.unpack_from('>784B', buf, index)
-        index += struct.calcsize('>784B')
-        images = np.array(images)
-        images = images/255.0
-        images = images.tolist()
-        # if i == 6:
-        #     print ','.join(['%s'%x for x in images])
-        image_sets.append(images)
-    bin_file.close()
-    return image_sets
-
-
-def read_label_files(filename):
-    bin_file = open(filename, 'rb')
-    buf = bin_file.read()
-    index = 0
-    magic, nums = struct.unpack_from('>II', buf, index)
-    index += struct.calcsize('>II')
-    labels = struct.unpack_from('>%sB'%nums, buf, index)
-    bin_file.close()
-    labels = np.array(labels)
-    return labels
-
-def fetch_traingset():
-    image_file = 'data/train-images-idx3-ubyte'
-    label_file = 'data/train-labels-idx1-ubyte'
-    images = read_image_files(image_file,60000)
-    labels = read_label_files(label_file)
-    return {'images': images,
-            'labels': labels}
-
-
-
-def fetch_testingset():
-    image_file = 'data/t10k-images-idx3-ubyte'
-    label_file = 'data/t10k-labels-idx1-ubyte'
-    images = read_image_files(image_file,10000)
-    labels = read_label_files(label_file)
-    return {'images': images,
-            'labels': labels}
+import mnist_data as mnist
 
 
 @provider(input_types={'image': dense_vector(784),
@@ -86,11 +31,10 @@ def fetch_testingset():
           cache=CacheType.CACHE_PASS_IN_MEM,
           should_shuffle=True)
 def process(settings, filename):
-    if filename == '1':
-        dataset = fetch_traingset()
+    if filename == 'train':
+        dataset = mnist.fetch_traingset()
     else:
-        dataset = fetch_testingset()
-
+        dataset = mnist.fetch_testingset()
 
     train_images = dataset['images']
     train_labels = dataset['labels']
@@ -105,7 +49,7 @@ def process(settings, filename):
 
 @provider(input_types={'image': dense_vector(784)})
 def predict_process(setting, filename):
-    trainset = fetch_testingset()
+    trainset = mnist.fetch_testingset()
     train_images = trainset['images']
     num_images = len(train_images)
 

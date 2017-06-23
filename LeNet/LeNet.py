@@ -89,10 +89,12 @@ pool_2 = paddle.img_pool_layer(input=conv_2,
                                pool_size=2,
                                pool_type=paddle.MaxPooling())
 
-#conv_3 = paddle.img_conv_layer(input=pool_2)
-
-fc_1 = paddle.fc_layer(input=pool_2, size=500, act=paddle.SigmoidActivation())
-fc_2 = paddle.fc_layer(input=fc_1, size=10, act=paddle.SoftmaxActivation())
+fc_1 = paddle.fc_layer(input=pool_2,
+                       size=500,
+                       act=paddle.SigmoidActivation())
+fc_2 = paddle.fc_layer(input=fc_1,
+                       size=10,
+                       act=paddle.SoftmaxActivation())
 
 label = paddle.data_layer(name='label', size=10)
 
