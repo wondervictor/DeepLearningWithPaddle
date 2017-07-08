@@ -42,8 +42,14 @@ conv_1 = paddle.layer.img_conv(name='conv_1',
                                padding=5,
                                stride=1)
 
+lrn_conv_1 = paddle.layer.img_cmrnorm(name='norm_1',
+                                      input=conv_1,
+                                      size=5,
+                                      scale=0.0001,
+                                      power=0.75)
+
 pool_1 = paddle.layer.img_pool(name='pool_1',
-                               input=conv_1,
+                               input=lrn_conv_1,
                                pool_type=paddle.pooling.Max(),
                                stride=2,
                                pool_size=2)
@@ -56,6 +62,12 @@ conv_2 = paddle.layer.img_conv(name='conv_2',
                                act=paddle.activation.Relu(),
                                stride=1,
                                padding=2)
+
+lrn_conv_2 = paddle.layer.img_cmrnorm(name='norm_2',
+                                      input=conv_2,
+                                      size=5,
+                                      scale=0.0001,
+                                      power=0.75)
 
 pool_2 = paddle.layer.img_pool(name='pool_2',
                                input=conv_2,
@@ -96,9 +108,22 @@ pool_3 = paddle.layer.img_pool(name='pool_3',
                                stride=2,
                                pool_size=2)
 
-fc_1 = paddle.layer.fc(name='fc_1', input=pool_3, size=4096, act=paddle.activation.Relu())
-fc_2 = paddle.layer.fc(name='fc_2', input=fc_1, size=4096, act=paddle.activation.Relu())
-fc_3 = paddle.layer.fc(name='fc_3', input=fc_2, size=10, act=paddle.activation.Softmax())
+fc_1 = paddle.layer.fc(name='fc_1',
+                       input=pool_3,
+                       size=4096,
+                       act=paddle.activation.Relu(),
+                       layer_attr=paddle.attr.Extra(drop_rate=0.5))
+
+fc_2 = paddle.layer.fc(name='fc_2',
+                       input=fc_1,
+                       size=4096,
+                       act=paddle.activation.Relu(),
+                       layer_attr=paddle.attr.Extra(drop_rate=0.5))
+
+fc_3 = paddle.layer.fc(name='fc_3',
+                       input=fc_2,
+                       size=10,
+                       act=paddle.activation.Softmax())
 
 label = paddle.layer.data(name='label',type=paddle.data_type.integer_value(10))
 
