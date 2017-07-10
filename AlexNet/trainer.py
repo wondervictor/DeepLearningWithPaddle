@@ -29,9 +29,8 @@ import gzip
 paddle.init(use_gpu=False, trainer_count=2)
 
 image_size = 32 * 32 * 3
-
-
-image = paddle.layer.data(name='image',  type=paddle.data_type.dense_vector(image_size))
+image = paddle.layer.data(name='image',
+                          type=paddle.data_type.dense_vector(image_size))
 
 conv_1 = paddle.layer.img_conv(name='conv_1',
                                input=image,
@@ -125,21 +124,25 @@ fc_3 = paddle.layer.fc(name='fc_3',
                        size=10,
                        act=paddle.activation.Softmax())
 
-label = paddle.layer.data(name='label',type=paddle.data_type.integer_value(10))
+label = paddle.layer.data(name='label',
+                          type=paddle.data_type.integer_value(10))
 
-cost_layer = paddle.layer.classification_cost(input=fc_3, label=label)
-
+# 分类损失
+cost_layer = paddle.layer.classification_cost(input=fc_3,
+                                              label=label)
+# 参数创建
 parameters = paddle.parameters.create(cost_layer)
-
-
+# 优化算法配置
 optimizer = paddle.optimizer.Momentum(momentum=0.9,
                                       regularization=paddle.optimizer.L2Regularization(rate=0.0002 * 128),
                                       learning_rate=0.1 / 128.0,
                                       learning_rate_decay_a=0.1,
                                       learning_rate_decay_b=50000 * 100,
                                       learning_rate_schedule='discexp')
-
-trainer = paddle.trainer.SGD(parameters=parameters,update_equation=optimizer,cost=cost_layer)
+# 初始化Trainer
+trainer = paddle.trainer.SGD(parameters=parameters,
+                             update_equation=optimizer,
+                             cost=cost_layer)
 
 
 def event_handler(event):
@@ -168,4 +171,7 @@ feeding = {'image': 0,
            'label': 1}
 file_path = '/Users/vic/Dev/DeepLearning/Paddle/VGG-CIFAR/Images/cifar-10-batches-py/data_batch_1'
 reader = data_provider.data_reader(file_path, 0)
-trainer.train(num_passes=10, reader=paddle.batch(reader, batch_size=128), event_handler=event_handler, feeding=feeding)
+trainer.train(num_passes=10,
+              reader=paddle.batch(reader, batch_size=128),
+              event_handler=event_handler,
+              feeding=feeding)
