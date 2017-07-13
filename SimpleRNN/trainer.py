@@ -24,74 +24,90 @@ import sys
 import gzip
 import data_provider
 
-paddle.init(use_gpu=False, trainer_count=1)
 
-TIME_STEP = 10
+def network(x):
+    recurrent = paddle.networks.simple_lstm(input=x, size=10, act=paddle.activation.Relu())
 
-x = paddle.layer.data(
-    name='x',
-    type=paddle.data_type.dense_vector_sequence(TIME_STEP)
-)
+    fc_1 = paddle.layer.fc(input=recurrent, size=1, act=paddle.activation.Linear())
 
-label = paddle.layer.data(
-    name='y',
-    type=paddle.data_type.dense_vector(
-        dim=1
+    output = paddle.layer.last_seq(input=fc_1)
+
+    return output
+
+def train(x_, model_path, is_predict=False):
+
+    paddle.init(use_gpu=False, trainer_count=1)
+
+    TIME_STEP = 10
+
+    x = paddle.layer.data(
+        name='x',
+        type=paddle.data_type.dense_vector_sequence(TIME_STEP)
     )
-)
+
+    output = network(x)
 
 
-recurrent = paddle.networks.simple_lstm(input=x, size=10, act=paddle.activation.Relu())
+    if not is_predict:
 
-output = paddle.layer.fc(input=recurrent, size=1, act=paddle.activation.Linear())
+        label = paddle.layer.data(
+            name='y',
+            type=paddle.data_type.dense_vector(
+                dim=1
+            )
+        )
+
+        loss = paddle.layer.mse_cost(input=output, label=label)
+
+        parameters = paddle.parameters.create(loss)
+
+        optimizer = paddle.optimizer.Adam(
+            learning_rate=1e-3,
+            regularization=paddle.optimizer.L2Regularization(rate=8e-4)
+        )
+
+        trainer = paddle.trainer.SGD(cost=loss,
+                                     parameters=parameters,
+                                     update_equation=optimizer)
+        feeding = {'x': 0, 'y': 1}
+
+        def event_handler(event):
+
+            if isinstance(event, paddle.event.EndIteration):
+                if event.batch_id % 50 == 0:
+                    print ("\n pass %d, Batch: %d cost: %f" % (event.pass_id, event.batch_id, event.cost))
+                else:
+                    sys.stdout.write('.')
+                    sys.stdout.flush()
+            if isinstance(event, paddle.event.EndPass):
+                # save parameters
+                feeding = {'x': 0,
+                           'y': 1}
+                with gzip.open('output/params_pass_%d.tar.gz' % event.pass_id, 'w') as f:
+                    parameters.to_tar(f)
+                filepath = 'data/test.data'
+                result = trainer.test(
+                    reader=paddle.batch(data_provider.data_reader(filepath), batch_size=16),
+                    feeding=feeding)
+                print ("\nTest with Pass %d, cost: %s" % (event.pass_id, result.cost))
+
+        train_file_path = 'data/train.data'
+
+        reader = data_provider.data_reader(train_file_path)
+
+        trainer.train(
+            paddle.batch(reader=reader, batch_size=128),
+            num_passes=120,
+            event_handler=event_handler,
+            feeding=feeding
+        )
+    else:
+        with gzip.open(model_path, 'r') as openFile:
+            parameters = paddle.parameters.Parameters.from_tar(openFile)
+        result = paddle.infer(input=[[x_]], parameters=parameters, output_layer=output, feeding={'x':0})
+
+        return result
 
 
-loss = paddle.layer.mse_cost(input=paddle.layer.last_seq(input=output), label=label)
-
-parameters = paddle.parameters.create(loss)
-
-print(parameters.keys())
-
-optimizer = paddle.optimizer.Adam(
-    learning_rate=1e-3,
-    regularization=paddle.optimizer.L2Regularization(rate=8e-4)
-)
-
-trainer = paddle.trainer.SGD(cost=loss,
-                             parameters=parameters,
-                             update_equation=optimizer)
-feeding = {'x': 0, 'y': 1}
-
-
-def event_handler(event):
-
-    if isinstance(event, paddle.event.EndIteration):
-        if event.batch_id % 10 == 0:
-            print ("\n pass %d, Batch: %d cost: %f" % (event.pass_id, event.batch_id, event.cost))
-        else:
-            sys.stdout.write('.')
-            sys.stdout.flush()
-    if isinstance(event, paddle.event.EndPass):
-        # save parameters
-        feeding = {'x': 0,
-                   'y': 1}
-        with gzip.open('output/params_pass_%d.tar.gz' % event.pass_id, 'w') as f:
-            parameters.to_tar(f)
-        filepath = 'data/test.data'
-        result = trainer.test(
-            reader=paddle.batch(data_provider.data_reader(filepath), batch_size=16),
-            feeding=feeding)
-        print ("\nTest with Pass %d, cost: %s" % (event.pass_id, result.cost))
-
-train_file_path = 'data/train.data'
-
-reader = data_provider.data_reader(train_file_path)
-
-trainer.train(
-    paddle.batch(reader=reader, batch_size=128),
-    num_passes=1000,
-    event_handler=event_handler,
-    feeding=feeding
-)
 
 
