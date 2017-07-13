@@ -28,7 +28,7 @@ def data_reader(path):
         with open(path, 'r') as openFile:
             lines = openFile.readlines()
             for line in lines:
-                element = line.rstrip('\n\r').split(',')
+                element = map(float, line.rstrip('\n\r').split(','))
                 x = element[:-1]
                 y = element[-1]
                 yield x, y

@@ -30,10 +30,7 @@ TIME_STEP = 10
 
 x = paddle.layer.data(
     name='x',
-    type=paddle.data_type.dense_vector(
-        dim=TIME_STEP,
-        seq_type=1
-    )
+    type=paddle.data_type.dense_vector_sequence(TIME_STEP)
 )
 
 label = paddle.layer.data(
@@ -43,48 +40,34 @@ label = paddle.layer.data(
     )
 )
 
-recurrent = paddle.v2.recurrent(
-    input=x,
-    act=paddle.activation.Linear(),
-    bias_attr=paddle.attr.Param(
-        initial_mean=0.,
-        initial_std=0.01
-    ),
-    param_attr=paddle.attr.Param(
-        initial_std=0.01,
-        initial_mean=0.
-    )
-)
 
-output = paddle.layer.last_seq(recurrent)
+recurrent = paddle.networks.simple_lstm(input=x, size=10, act=paddle.activation.Relu())
 
-loss = paddle.layer.mse_cost(input=output, label=label)
+output = paddle.layer.fc(input=recurrent, size=1, act=paddle.activation.Linear())
+
+
+loss = paddle.layer.mse_cost(input=paddle.layer.last_seq(input=output), label=label)
 
 parameters = paddle.parameters.create(loss)
 
-optimizer = paddle.optimizer.RMSProp(
-    regularization=paddle.optimizer.L2Regularization(rate=0.0002 * 128),
-    learning_rate=0.001,
-    learning_rate_decay_a=0.1,
-    learning_rate_decay_b=50000 * 100,
+print(parameters.keys())
+
+optimizer = paddle.optimizer.Adam(
+    learning_rate=1e-3,
+    regularization=paddle.optimizer.L2Regularization(rate=8e-4)
 )
 
-
-trainer = paddle.trainer.SGD(
-    cost=loss,
-    parameters=parameters,
-    update_equation=optimizer
-)
-
+trainer = paddle.trainer.SGD(cost=loss,
+                             parameters=parameters,
+                             update_equation=optimizer)
 feeding = {'x': 0, 'y': 1}
-
-train_file_path = 'data/train.data'
 
 
 def event_handler(event):
+
     if isinstance(event, paddle.event.EndIteration):
-        if event.batch_id % 100 == 0:
-            print ("\n pass %d, Batch: %d cost: %f, %s" % (event.pass_id, event.batch_id, event.cost, event.metrics))
+        if event.batch_id % 10 == 0:
+            print ("\n pass %d, Batch: %d cost: %f" % (event.pass_id, event.batch_id, event.cost))
         else:
             sys.stdout.write('.')
             sys.stdout.flush()
@@ -96,12 +79,19 @@ def event_handler(event):
             parameters.to_tar(f)
         filepath = 'data/test.data'
         result = trainer.test(
-            reader=paddle.batch(data_provider.data_reader(filepath), batch_size=128),
+            reader=paddle.batch(data_provider.data_reader(filepath), batch_size=16),
             feeding=feeding)
-        print ("\nTest with Pass %d, %s" % (event.pass_id, result.metrics))
+        print ("\nTest with Pass %d, cost: %s" % (event.pass_id, result.cost))
 
+train_file_path = 'data/train.data'
 
-reader=data_provider.data_reader(train_file_path)
-trainer.train(paddle.batch(reader=reader, batch_size=128), event_handler=event_handler, feeding=feeding)
+reader = data_provider.data_reader(train_file_path)
+
+trainer.train(
+    paddle.batch(reader=reader, batch_size=128),
+    num_passes=1000,
+    event_handler=event_handler,
+    feeding=feeding
+)
 
 
