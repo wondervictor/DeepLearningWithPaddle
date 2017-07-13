@@ -26,6 +26,7 @@ import math
 Sine Wave Data Generator
 """
 
+
 def generator_sine_wave_data(first_num, n, timestep, filename):
 
     def sine_f(x):
@@ -40,7 +41,7 @@ def generator_sine_wave_data(first_num, n, timestep, filename):
 
     with open('data/%s' % filename, 'w+') as openFile:
         for data_pair in data:
-            line = ['%s' % x for x in data_pair[0]].join(',')
+            line = ','.join(['%s' % x for x in data_pair[0]])
             line += ',%s\n' % data_pair[1]
             openFile.write(line)
 
