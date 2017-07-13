@@ -48,9 +48,9 @@ def generator_sine_wave_data(first_num, n, timestep, filename):
 
 if __name__ == '__main__':
 
-    generator_sine_wave_data(3.2, 10000, 10, 'train.data')
+    generator_sine_wave_data(3.2, 10011, 10, 'train.data')
 
-    generator_sine_wave_data(5.8, 1000, 10, 'test.data')
+    generator_sine_wave_data(5.8, 1011, 10, 'test.data')
 
 
 

@@ -20,14 +20,54 @@ SOFTWARE.
 """
 
 import trainer
+import data_generator
+import matplotlib.pyplot as plt
+
+data_generator.generator_sine_wave_data(99.43, 111, 10, 'valid.data')
 
 
-x = [1.6868304858,18.0300864451,14.026685679,16.6705802951,-0.861608819068,1.99384478621,-1.28554210301,15.9376298728,16.2855108252,20.2770661091]
+data = []
+with open('data/valid.data', 'r') as f:
+    lines = f.readlines()
+    for line in lines:
+        element = map(float, line.rstrip('\n\r').split(','))
+        data.append(element)
 
-y = 6.66213488918
+label = [p[-1] for p in data]
+
+x = [[p[:-1]] for p in data]
+
+s = trainer.train(x, 'output/model.tar.gz', True)
+predict = [x[0] for x in s]
 
 
-predict = trainer.train(x, 'output/model.tar.gz', False)
+print("[%s]"% (' '.join(['%s' % x for x in label])))
 
+print("[%s]"% (' '.join(['%s' % x for x in predict])))
 
-print(predict)
+# print("[")
+# for i in range(len(s)):
+#     print(label[i])
+# print("]")
+#
+# print("[")
+# for i in range(len(s)):
+#     print(predict[i])
+# print("]")
+
+def mse(x, y):
+    sum_val = 0.0
+    for i in range(len(x)):
+        sum_val += (x[i]-y[i])**2
+    return sum_val/len(x)
+
+print("MSE: %s" % (mse(label, predict)))
+
+# 0.357120318785
+# plt.figure(1)
+#
+# x = range(0, len(label))
+#
+# plt.plot(x, predict)
+# plt.plot(x, label)
+# plt.show()

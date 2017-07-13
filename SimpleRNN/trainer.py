@@ -34,6 +34,7 @@ def network(x):
 
     return output
 
+
 def train(x_, model_path, is_predict=False):
 
     paddle.init(use_gpu=False, trainer_count=1)
@@ -97,14 +98,14 @@ def train(x_, model_path, is_predict=False):
 
         trainer.train(
             paddle.batch(reader=reader, batch_size=128),
-            num_passes=120,
+            num_passes=200,
             event_handler=event_handler,
             feeding=feeding
         )
     else:
         with gzip.open(model_path, 'r') as openFile:
             parameters = paddle.parameters.Parameters.from_tar(openFile)
-        result = paddle.infer(input=[[x_]], parameters=parameters, output_layer=output, feeding={'x':0})
+        result = paddle.infer(input=x_, parameters=parameters, output_layer=output, feeding={'x':0})
 
         return result
 
