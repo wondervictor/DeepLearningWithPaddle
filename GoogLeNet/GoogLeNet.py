@@ -36,63 +36,92 @@ class_num = 100
 image_size = 32 * 32 * 3
 
 
-def inception(input, name, channels, filter_num1, filter_num2, filter_num3, filter_num4, filter_num5, filter_num6):
+def inception(
+        input,  # 输入
+        name,   # inception 模块名
+        channels,   # 输入通道
+        filter_num1,    # 左侧1 1x1 卷积核
+        filter_num2,    # 左侧2 1x1 卷积核
+        filter_num3,    # 右侧2 1x1 卷积核
+        filter_num4,    # 左侧2 3x3 卷积核
+        filter_num5,    # 右侧2 5x5 卷积核
+        filter_num6     # 右侧1 1x1 卷积核
+):
 
-    conv_1 = paddle.layer.img_conv(input=input,
-                                   name=name+'conv_1',
-                                   filter_size=1,
-                                   num_channels=channels,
-                                   num_filters=filter_num1,
-                                   stride=1,
-                                   padding=0)
+    conv_1 = paddle.layer.img_conv(
+        input=input,
+        name=name+'conv_1',
+        filter_size=1,
+        num_channels=channels,
+        num_filters=filter_num1,
+        stride=1,
+        padding=0
+    )
 
-    conv_2 = paddle.layer.img_conv(input=input,
-                                   name=name+'conv_2',
-                                   filter_size=1,
-                                   num_filters=filter_num2,
-                                   num_channels=channels,
-                                   stride=1,
-                                   padding=0)
+    conv_2 = paddle.layer.img_conv(
+        input=input,
+        name=name+'conv_2',
+        filter_size=1,
+        num_filters=filter_num2,
+        num_channels=channels,
+        stride=1,
+        padding=0
+    )
 
-    conv_3 = paddle.layer.img_conv(input=input,
-                                   name=name+'conv_3',
-                                   filter_size=1,
-                                   num_filters=filter_num3,
-                                   num_channels=channels,
-                                   stride=1,
-                                   padding=0)
+    conv_3 = paddle.layer.img_conv(
+        input=input,
+        name=name+'conv_3',
+        filter_size=1,
+        num_filters=filter_num3,
+        num_channels=channels,
+        stride=1,
+        padding=0
+    )
 
-    pool = paddle.layer.img_pool(input=input,
-                                 name=name+'pool',
-                                 pool_size=3,
-                                 stride=1,
-                                 padding=1,
-                                 num_channels=channels,
-                                 pool_type=paddle.MaxPool())
+    pool = paddle.layer.img_pool(
+        input=input,
+        name=name+'pool',
+        pool_size=3,
+        stride=1,
+        padding=1,
+        num_channels=channels,
+        pool_type=paddle.MaxPool()
+    )
 
-    conv_3x3 = paddle.layer.img_conv(input=conv_2,
-                                     name=name+'conv_3x3',
-                                     filter_size=3,
-                                     num_filters=filter_num4,
-                                     padding=1,
-                                     stride=1)
+    conv_3x3 = paddle.layer.img_conv(
+        input=conv_2,
+        name=name+'conv_3x3',
+        filter_size=3,
+        num_filters=filter_num4,
+        padding=1,
+        stride=1
+    )
 
-    conv_5x5 = paddle.layer.img_conv(input=conv_3,
-                                     name=name+'conv_5x5',
-                                     filter_size=5,
-                                     num_filters=filter_num5,
-                                     padding=1,
-                                     stride=1)
+    conv_5x5 = paddle.layer.img_conv(
+        input=conv_3,
+        name=name+'conv_5x5',
+        filter_size=5,
+        num_filters=filter_num5,
+        padding=2,
+        stride=1
+    )
 
-    conv_1x1 = paddle.layer.img_conv(input=pool,
-                                     name=name+'conv_1x1',
-                                     filter_size=1,
-                                     num_filters=filter_num6,
-                                     padding=1,
-                                     stide=1)
+    conv_1x1 = paddle.layer.img_conv(
+        input=pool,
+        name=name+'conv_1x1',
+        filter_size=1,
+        num_filters=filter_num6,
+        padding=1,
+        stide=1
+    )
 
-    conv_concat = paddle.layer.concat(name=name+'concat', input=[conv_1, conv_1x1, conv_3x3, conv_5x5])
+    conv_concat = paddle.layer.concat(
+        name=name+'concat',
+        input=[conv_1, conv_1x1, conv_3x3, conv_5x5]
+    )
+
     return conv_concat
+
 
 
 def inception_result(name, input, filters):
