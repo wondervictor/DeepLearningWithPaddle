@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+# -*- coding:utf-8 -*-
+
 """
 MIT License
 Copyright (c) 2017 Vic Chan
@@ -19,38 +20,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-import math
+import mnist_data
 
 
-"""
-Sine Wave Data Generator
-"""
-
-def generator_sine_wave_data(first_num, n, timestep, filename):
-
-    def sine_f(x):
-        x = x + first_num
-        return 4*math.sin(3*x) + 2.5*math.cos(6*x)+10*math.sin(x) + 10.3
-
-    data = []
-    for i in range(0, n-timestep-1):
-        x = [sine_f(p) for p in range(i, i+timestep)]
-        y = sine_f(i+timestep)
-        data.append((x, y))
-
-    with open('data/%s' % filename, 'w+') as openFile:
-        for data_pair in data:
-            line = ','.join(['%s' % x for x in data_pair[0]])
-            line += ',%s\n' % data_pair[1]
-            openFile.write(line)
-
-
-
-if __name__ == '__main__':
-
-    generator_sine_wave_data(3.2, 10011, 10, 'train.data')
-
-    generator_sine_wave_data(5.8, 1011, 10, 'test.data')
-
-
-
+def create_reader(filename, n):
+    def reader():
+        if filename == 'train':
+            dataset = mnist_data.fetch_traingset()
+        else:
+            dataset = mnist_data.fetch_testingset()
+        for i in range(n):
+            yield [dataset['images'][i][i*28:(i+1)*28] for i in range(28)], dataset['labels'][i]
+    return reader

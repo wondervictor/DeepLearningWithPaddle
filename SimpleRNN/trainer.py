@@ -26,9 +26,17 @@ import data_provider
 
 
 def network(x):
-    recurrent = paddle.networks.simple_lstm(input=x, size=10, act=paddle.activation.Relu())
+    recurrent = paddle.networks.simple_lstm(
+        input=x,
+        size=10,
+        act=paddle.activation.Relu()
+    )
 
-    fc_1 = paddle.layer.fc(input=recurrent, size=1, act=paddle.activation.Linear())
+    fc_1 = paddle.layer.fc(
+        input=recurrent,
+        size=1,
+        act=paddle.activation.Linear()
+    )
 
     output = paddle.layer.last_seq(input=fc_1)
 
@@ -38,17 +46,17 @@ def network(x):
 def train(x_, model_path, is_predict=False):
 
     paddle.init(use_gpu=False, trainer_count=1)
-
+    # 步长
     TIME_STEP = 10
 
     x = paddle.layer.data(
         name='x',
         type=paddle.data_type.dense_vector_sequence(TIME_STEP)
     )
-
+    # 模型输出
     output = network(x)
 
-
+    # 训练
     if not is_predict:
 
         label = paddle.layer.data(
@@ -57,11 +65,11 @@ def train(x_, model_path, is_predict=False):
                 dim=1
             )
         )
-
+        # 计算损失
         loss = paddle.layer.mse_cost(input=output, label=label)
 
         parameters = paddle.parameters.create(loss)
-
+        # Adam 优化算法
         optimizer = paddle.optimizer.Adam(
             learning_rate=1e-3,
             regularization=paddle.optimizer.L2Regularization(rate=8e-4)
@@ -72,11 +80,13 @@ def train(x_, model_path, is_predict=False):
                                      update_equation=optimizer)
         feeding = {'x': 0, 'y': 1}
 
+        # 训练事件处理
         def event_handler(event):
 
             if isinstance(event, paddle.event.EndIteration):
                 if event.batch_id % 50 == 0:
-                    print ("\n pass %d, Batch: %d cost: %f" % (event.pass_id, event.batch_id, event.cost))
+                    print ("\n pass %d, Batch: %d cost: %f"
+                           % (event.pass_id, event.batch_id, event.cost))
                 else:
                     sys.stdout.write('.')
                     sys.stdout.flush()
@@ -87,8 +97,10 @@ def train(x_, model_path, is_predict=False):
                 with gzip.open('output/params_pass_%d.tar.gz' % event.pass_id, 'w') as f:
                     parameters.to_tar(f)
                 filepath = 'data/test.data'
+                # 测试数据
+                test_reader=data_provider.data_reader(filepath)
                 result = trainer.test(
-                    reader=paddle.batch(data_provider.data_reader(filepath), batch_size=16),
+                    reader=paddle.batch(test_reader, batch_size=16),
                     feeding=feeding)
                 print ("\nTest with Pass %d, cost: %s" % (event.pass_id, result.cost))
 
@@ -102,10 +114,19 @@ def train(x_, model_path, is_predict=False):
             event_handler=event_handler,
             feeding=feeding
         )
+
     else:
+        # 进行预测
+        # 加载模型参数
         with gzip.open(model_path, 'r') as openFile:
             parameters = paddle.parameters.Parameters.from_tar(openFile)
-        result = paddle.infer(input=x_, parameters=parameters, output_layer=output, feeding={'x':0})
+        # 使用infer进行预测
+        result = paddle.infer(
+            input=x_,
+            parameters=parameters,
+            output_layer=output,
+            feeding={'x':0}
+        )
 
         return result
 

@@ -60,6 +60,6 @@ def read_image(path):
 
     print("Num=%d Confidence: %.10f\n" % (num, confidence))
 
-read_image('/Users/vic/Dev/DeepLearning/Paddle/DeepLearningWithPaddle/DNN-MNIST/4.png')
+read_image('/Users/vic/Dev/DeepLearning/Paddle/DeepLearningWithPaddle/DNN-MNIST/3.png')
 
 

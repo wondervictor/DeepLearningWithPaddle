@@ -19,6 +19,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+
 import paddle.v2 as paddle
 import data_provider
 import sys
@@ -63,12 +64,22 @@ def network(input):
     return output_layer
 
 
+
+
+
+
 def train(passes):
 
     output_layer = network(image)
     # cost
-    label = paddle.layer.data(name='label', type=paddle.data_type.integer_value(class_dim))
-    cost = paddle.layer.classification_cost(input=output_layer, label=label)
+    label = paddle.layer.data(
+        name='label',
+        type=paddle.data_type.integer_value(class_dim)
+    )
+    cost = paddle.layer.classification_cost(
+        input=output_layer,
+        label=label
+    )
 
     parameters = paddle.parameters.create(cost)
 
@@ -92,8 +103,10 @@ def train(passes):
     def event_handler(event):
         if isinstance(event, paddle.event.EndIteration):
             if event.batch_id % 100 == 0:
-                print("\nPass %d, Batch %d, Cost %f, %s" % (
-                    event.pass_id, event.batch_id, event.cost, event.metrics))
+                print("\nPass %d, Batch %d, Cost %f, %s" % (event.pass_id,
+                                                            event.batch_id,
+                                                            event.cost,
+                                                            event.metrics))
             else:
                 sys.stdout.write('.')
                 sys.stdout.flush()
@@ -129,7 +142,11 @@ def predict(x, model_path):
     with gzip.open(model_path, 'r') as openFile:
         parameters = paddle.parameters.Parameters.from_tar(openFile)
 
-    result = paddle.infer(input=x, parameters=parameters, output_layer=output_layer, feeding={'image': 0})
+    result = paddle.infer(
+        input=x,
+        parameters=parameters,
+        output_layer=output_layer,
+        feeding={'image': 0})
 
     return result
 

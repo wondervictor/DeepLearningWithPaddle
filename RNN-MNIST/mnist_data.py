@@ -60,8 +60,9 @@ def read_label_files(filename):
     return labels
 
 def fetch_traingset():
-    image_file = 'data/train-images-idx3-ubyte'
-    label_file = 'data/train-labels-idx1-ubyte'
+    path = '/Users/vic/Dev/DeepLearning/Paddle/DeepLearningWithPaddle/DNN-MNIST'
+    image_file = path + 'data/train-images-idx3-ubyte'
+    label_file = path + 'data/train-labels-idx1-ubyte'
     images = read_image_files(image_file,60000)
     labels = read_label_files(label_file)
     return {'images': images,
@@ -69,8 +70,10 @@ def fetch_traingset():
 
 
 def fetch_testingset():
-    image_file = 'data/t10k-images-idx3-ubyte'
-    label_file = 'data/t10k-labels-idx1-ubyte'
+    path = '/Users/vic/Dev/DeepLearning/Paddle/DeepLearningWithPaddle/DNN-MNIST'
+
+    image_file = path + 'data/t10k-images-idx3-ubyte'
+    label_file = path + 'data/t10k-labels-idx1-ubyte'
     images = read_image_files(image_file,10000)
     labels = read_label_files(label_file)
     return {'images': images,
@@ -89,6 +92,4 @@ def test():
     plt.imshow(images, cmap='gray')
     plt.show()
 
-if __name__ == '__main__':
-    test()
 
