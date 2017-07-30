@@ -30,5 +30,33 @@ def create_reader(filename, n):
         else:
             dataset = mnist_data.fetch_testingset()
         for i in range(n):
-            yield [dataset['images'][i][i*28:(i+1)*28] for i in range(28)], dataset['labels'][i]
+            yield   dataset['images'][i][0:28], \
+                    dataset['images'][i][28:56], \
+                    dataset['images'][i][56:84], \
+                    dataset['images'][i][84:112], \
+                    dataset['images'][i][112:140], \
+                    dataset['images'][i][140:168], \
+                    dataset['images'][i][168:196], \
+                    dataset['images'][i][196:224], \
+                    dataset['images'][i][224:252], \
+                    dataset['images'][i][252:280], \
+                    dataset['images'][i][280:308], \
+                    dataset['images'][i][308:336], \
+                    dataset['images'][i][336:364], \
+                    dataset['images'][i][364:392], \
+                    dataset['images'][i][392:420], \
+                    dataset['images'][i][420:448], \
+                    dataset['images'][i][448:476], \
+                    dataset['images'][i][476:504], \
+                    dataset['images'][i][504:532], \
+                    dataset['images'][i][532:560], \
+                    dataset['images'][i][560:588], \
+                    dataset['images'][i][588:616], \
+                    dataset['images'][i][616:644], \
+                    dataset['images'][i][644:672], \
+                    dataset['images'][i][672:700], \
+                    dataset['images'][i][700:728], \
+                    dataset['images'][i][728:756], \
+                    dataset['images'][i][756:784], \
+                    dataset['labels'][i]
     return reader

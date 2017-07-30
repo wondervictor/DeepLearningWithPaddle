@@ -60,7 +60,7 @@ def read_label_files(filename):
     return labels
 
 def fetch_traingset():
-    path = '/Users/vic/Dev/DeepLearning/Paddle/DeepLearningWithPaddle/DNN-MNIST'
+    path = '/Users/vic/Dev/DeepLearning/Paddle/DeepLearningWithPaddle/DNN-MNIST/'
     image_file = path + 'data/train-images-idx3-ubyte'
     label_file = path + 'data/train-labels-idx1-ubyte'
     images = read_image_files(image_file,60000)
@@ -70,7 +70,7 @@ def fetch_traingset():
 
 
 def fetch_testingset():
-    path = '/Users/vic/Dev/DeepLearning/Paddle/DeepLearningWithPaddle/DNN-MNIST'
+    path = '/Users/vic/Dev/DeepLearning/Paddle/DeepLearningWithPaddle/DNN-MNIST/'
 
     image_file = path + 'data/t10k-images-idx3-ubyte'
     label_file = path + 'data/t10k-labels-idx1-ubyte'
