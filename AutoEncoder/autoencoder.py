@@ -24,7 +24,6 @@ import gzip
 import sys
 import data_provider
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 def param():
@@ -106,10 +105,11 @@ y = output(y)
 
 def train():
 
-    optimizer = paddle.optimizer.Adam(
+    optimizer = paddle.optimizer.RMSProp(
         learning_rate=1e-3,
         regularization=paddle.optimizer.L2Regularization(rate=8e-4)
     )
+
     loss = paddle.layer.mse_cost(label=x, input=y)
 
     parameters = paddle.parameters.create(loss)
@@ -146,20 +146,11 @@ def train():
     )
 
 
-def show(origin, pred):
-    f, a = plt.subplots(2, 10, figsize=(10, 2))
-    for i in range(10):
-        a[0][i].imshow(np.reshape(origin[i], (28, 28)))
-        a[1][i].imshow(np.reshape(pred[i], (28, 28)))
-    f.show()
-    plt.draw()
-    plt.waitforbuttonpress()
-
 
 def test(model_path):
     with gzip.open(model_path, 'r') as openFile:
         parameters = paddle.parameters.Parameters.from_tar(openFile)
-    testset = data_provider.fetch_testingset()['images'][:10]
+    testset = [[x] for x in data_provider.fetch_testingset()['images'][:10]]
     # 使用infer进行预测
     result = paddle.infer(
         input=testset,
@@ -167,10 +158,12 @@ def test(model_path):
         output_layer=y,
         feeding={'x': 0}
     )
-    
-
+    return result, np.array(testset)
 
 if __name__ == '__main__':
-    #test('output/params_pass_18.tar.gz')
-    train()
+
+    origin, result = test('output/params_pass_19.tar.gz')
+    np.save('origin.dat', origin)
+    np.save('result.dat', result)
+
 
