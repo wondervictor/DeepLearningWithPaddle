@@ -93,6 +93,8 @@ def train():
 
     parameters = paddle.parameters.create(loss)
 
+    # print(parameters.keys())
+
     optimizer = paddle.optimizer.Adam(
         learning_rate=1e-3,
         regularization=paddle.optimizer.L2Regularization(rate=8e-4)
