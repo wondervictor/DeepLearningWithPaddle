@@ -27,21 +27,34 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+def param():
+    return paddle.attr.Param(
+        initial_std=0.01,
+        initial_mean=0
+    )
+
+
 def encoder(x_):
     x_ = paddle.layer.fc(
         input=x_,
         size=512,
-        act=paddle.activation.Sigmoid()
+        act=paddle.activation.Sigmoid(),
+        param_attr=param(),
+        bias_attr=param()
     )
     x_ = paddle.layer.fc(
         input=x_,
         size=256,
-        act=paddle.activation.Relu()
+        act=paddle.activation.Relu(),
+        param_attr=param(),
+        bias_attr=param()
     )
     x_ = paddle.layer.fc(
         input=x_,
         size=128,
-        act=paddle.activation.Relu()
+        act=paddle.activation.Relu(),
+        param_attr=param(),
+        bias_attr=param()
     )
     return x_
 
@@ -50,17 +63,23 @@ def decoder(x_):
     x_ = paddle.layer.fc(
         input=x_,
         size=128,
-        act=paddle.activation.Sigmoid()
+        act=paddle.activation.Sigmoid(),
+        param_attr=param(),
+        bias_attr=param()
     )
     x_ = paddle.layer.fc(
         input=x_,
         size=256,
-        act=paddle.activation.Relu()
+        act=paddle.activation.Relu(),
+        param_attr=param(),
+        bias_attr=param()
     )
     x_ = paddle.layer.fc(
         input=x_,
         size=512,
-        act=paddle.activation.Relu()
+        act=paddle.activation.Relu(),
+        param_attr=param(),
+        bias_attr=param()
     )
     return x_
 
@@ -69,7 +88,9 @@ def output(x_):
     return paddle.layer.fc(
         input=x_,
         size=784,
-        act=paddle.activation.Relu()
+        act=paddle.activation.Relu(),
+        param_attr=param(),
+        bias_attr=param()
     )
 
 paddle.init(use_gpu=False, trainer_count=1)
@@ -143,13 +164,13 @@ def test(model_path):
     result = paddle.infer(
         input=testset,
         parameters=parameters,
-        output_layer=output,
+        output_layer=y,
         feeding={'x': 0}
     )
-    print(result)
+    
+
 
 if __name__ == '__main__':
+    #test('output/params_pass_18.tar.gz')
     train()
-
-
 
