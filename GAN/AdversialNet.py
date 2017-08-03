@@ -24,11 +24,106 @@ SOFTWARE.
     
 """
 
+import paddle.v2 as paddle
+import gzip
+import sys
+import numpy as np
+# from paddle.trainer.config_parser import parse_config
+# from paddle.trainer.config_parser import logger
+# import py_paddle.swig_paddle as api
 
-def generator():
-    pass
+
+relu = paddle.activation.Relu()
+sigmoid = paddle.activation.Sigmoid()
 
 
-def discriminator():
+def generator(z):
+
+    fc_1 = paddle.layer.fc(
+        input=z,
+        size=128,
+        act=relu
+    )
+
+    fc_2 = paddle.layer.fc(
+        input=fc_1,
+        size=256,
+        act=relu
+    )
+    # output the image
+    fc_3 = paddle.layer.fc(
+        input=fc_2,
+        size=784,
+        act=sigmoid
+    )
+
+    return fc_3
+
+
+def discriminator(x):
+
+    fc_1 = paddle.layer.fc(
+        input=x,
+        size=256,
+        act=relu
+    )
+
+    fc_2 = paddle.layer.fc(
+        input=fc_1,
+        size=128,
+        act=relu
+    )
+
+    # output the probability
+    fc_3 = paddle.layer.fc(
+        input=fc_2,
+        size=1,
+        act=sigmoid
+    )
+    return fc_3
+
+
+image = paddle.layer.data(
+    name='image',
+    type=paddle.data_type.dense_vector(784)
+)
+
+noise = paddle.layer.data(
+    name='noise',
+    type=paddle.data_type.dense_vector(100)
+)
+
+
+def train():
+    fake_sample = generator(noise)
+    d_real = discriminator(image)
+    d_fake = discriminator(fake_sample)
+
+    d_loss_1 = paddle.layer.addto(input=d_real, act=paddle.activation.Log(), bias=False)
+
+    parameters = paddle.parameters.create(d_loss_1)
+
+    def event_handler(event):
+        if isinstance(event, paddle.event.EndIteration):
+            if event.batch_id % 50 == 0:
+                print ("\n pass %d, Batch: %d cost: %f"
+                       % (event.pass_id, event.batch_id, event.cost))
+            else:
+                sys.stdout.write('.')
+                sys.stdout.flush()
+        if isinstance(event, paddle.event.EndPass):
+            with gzip.open('output/params_pass_%d.tar.gz' % event.pass_id, 'w') as f:
+                parameters.to_tar(f)
+
+
+
+
+
+
+
+
+
+
+def generate():
     pass
 
