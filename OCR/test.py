@@ -19,21 +19,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+
+import data_reader
+import gzip
 import numpy as np
-import matplotlib.pyplot as plt
 
 
-def show():
-    origin = np.load('origin.dat.npy')
-    pred = np.load('result.dat.npy')
-
-    import matplotlib.pyplot as plt
-    f, a = plt.subplots(2, 10, figsize=(10, 2))
-    for i in range(10):
-        a[0][i].imshow(np.reshape(origin[i], (28, 28)))
-        a[1][i].imshow(np.reshape(pred[i], (28, 28)))
-    f.show()
-    plt.show()
-    plt.waitforbuttonpress()
-
-show()

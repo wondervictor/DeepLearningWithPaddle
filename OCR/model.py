@@ -25,7 +25,6 @@ import sys
 import gzip
 import data_reader
 
-
 # cnn layers
 def model(x):
 
@@ -205,8 +204,61 @@ def train():
     )
 
 
+def predict(test_samples, model_path):
+    paddle.init(use_gpu=False, trainer_count=1)
+
+    x = paddle.layer.data(
+        name='image',
+        type=paddle.data_type.dense_vector(IMAGE_SIZE),
+        height=32,
+        width=80
+    )
+
+    with gzip.open(model_path, 'r') as f:
+        parameters = paddle.parameters.Parameters.from_tar(f)
+
+    output = model(x)
+
+    result = paddle.infer(
+        input=test_samples,
+        parameters=parameters,
+        output_layer=output,
+        feeding={'image': 0}
+    )
+
+    return result
+
+
+def generate_numbers(result):
+    nums = []
+    for i in range(4):
+        max_value = 0.0
+        max_index = -1
+        for j in range(10):
+            if max_value < result[i][j]:
+                max_value = result[i][j]
+                max_index = j
+        nums.append(max_index)
+    return nums
+
+
+def test():
+    model_path = '/Users/vic/Dev/DeepLearning/Paddle/DeepLearningWithPaddle/OCR/output/params_pass_9.tar.gz'
+    data, label = data_reader.testset()
+    test_samples =[[data[10]]] #[[x] for x in data[10:15]]  #[[x] for x in data[10:20]]
+    s = predict(test_samples, model_path)
+    print(s)
+    print(label[10])
+    print(generate_numbers(s))
+    # for i in range(5):
+    #     print('-------------')
+    #     print(label[10+i])
+
+
 if __name__ == '__main__':
-    train()
+    test()
+
+
 
 
 

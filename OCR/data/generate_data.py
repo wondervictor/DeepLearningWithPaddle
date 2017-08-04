@@ -78,13 +78,13 @@ def generate_datasets(train_size, test_size):
 
 
 def _test():
-    data_path = 'test_data.npy'
-    label_path = 'test_label.npy'
+    data_path = 'train_data.npy'
+    label_path = 'train_label.npy'
     data = np.load(data_path)
     label = np.load(label_path)
-    img = data[3]
+    img = data[1]
     img = np.reshape(img, [32, 80, 3])
-    print(label[3])
+    print(label[1])
     plt.imshow(img)
     plt.axis('off')
     plt.show()

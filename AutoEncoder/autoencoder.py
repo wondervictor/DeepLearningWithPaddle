@@ -25,7 +25,6 @@ import sys
 import data_provider
 import numpy as np
 
-
 def param():
     return paddle.attr.Param(
         initial_std=0.01,
@@ -144,7 +143,6 @@ def train():
         num_passes=20,
         event_handler=event_handler
     )
-
 
 
 def test(model_path):

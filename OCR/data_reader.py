@@ -39,3 +39,10 @@ def create_reader(type):
 
     return reader
 
+
+def testset():
+    data_path = 'data/train_data.npy'
+    label_path = 'data/train_label.npy'
+    data = np.load(data_path)
+    label = np.load(label_path)
+    return data[1:100], label[1:100]
