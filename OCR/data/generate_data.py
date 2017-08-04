@@ -50,8 +50,8 @@ def generate_datasets(train_size, test_size):
         code = str(num)
         img = generate_image(code, captcha)
         train_data.append(img)
-        train_label.append(num)
-
+        label = [int(j) for j in code]
+        train_label.append(label)
     train_label = np.array(train_label)
     train_data = np.array(train_data)
     np.save('train_data', train_data)
@@ -68,8 +68,8 @@ def generate_datasets(train_size, test_size):
         code = str(num)
         img = generate_image(code, captcha)
         test_data.append(img)
-        test_label.append(num)
-
+        label = [int(j) for j in code]
+        test_label.append(label)
     test_label = np.array(test_label)
     test_data = np.array(test_data)
     np.save('test_data', test_data)

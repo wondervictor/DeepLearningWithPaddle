@@ -21,6 +21,9 @@ SOFTWARE.
 
 
 import paddle.v2 as paddle
+import sys
+import gzip
+import data_reader
 
 
 # cnn layers
@@ -64,7 +67,7 @@ def model(x):
     )
 
     conv_4 = paddle.networks.img_conv_group(
-        input=conv_1,
+        input=conv_3,
         num_channels=3,
         pool_size=256,
         pool_stride=2,
@@ -135,14 +138,54 @@ def train():
 
     parameters = paddle.parameters.create(loss)
 
+    optimizer = paddle.optimizer.Adam(
+        learning_rate=1e-3,
+        regularization=paddle.optimizer.L2Regularization(rate=8e-4)
+    )
+
+    trainer = paddle.trainer.SGD(
+        cost=loss,
+        parameters=parameters,
+        update_equation= optimizer
+    )
+
+    feeding = {'image': 0,
+               'label': 1}
+
+    def event_handler(event):
+
+        if isinstance(event, paddle.event.EndIteration):
+            if event.batch_id % 50 == 0:
+                print ("\n pass %d, Batch: %d cost: %f metrics: %s" % (event.pass_id, event.batch_id, event.cost, event.metrics))
+            else:
+                sys.stdout.write('.')
+                sys.stdout.flush()
+        if isinstance(event, paddle.event.EndPass):
+            # save parameters
+            with gzip.open('output/params_pass_%d.tar.gz' % event.pass_id, 'w') as f:
+                parameters.to_tar(f)
+            test_reader = data_reader.create_reader('test')
+            result = trainer.test(
+                reader=paddle.batch(test_reader, batch_size=128),
+                feeding=feeding)
+            class_error_rate = result.metrics['classification_error_evaluator']
+            print ("\nTest with Pass %d, cost: %s ratio: %f" % (event.pass_id, result.cost,class_error_rate))
+
+    train_reader = data_reader.create_reader('train')
+    reader = paddle.batch(
+        reader=train_reader,
+        batch_size=128
+    )
+    trainer.train(
+        reader=reader,
+        feeding=feeding,
+        num_passes=10,
+        event_handler=event_handler
+    )
 
 
-
-
-
-
-
-
+if __name__ == '__main__':
+    train()
 
 
 

@@ -18,3 +18,31 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+
+import numpy as np
+
+
+def _test():
+    data_path = 'data/train_data.npy'
+    data = np.load(data_path)
+
+
+def create_reader(type):
+    def reader():
+        if type == 'train':
+            data_path = 'data/train_data.npy'
+            label_path = 'data/train_label.npy'
+            size = 10000
+        else:
+            data_path = 'data/test_data.npy'
+            label_path = 'data/test_label.npy'
+            size = 1000
+        data = np.load(data_path)
+        label = np.load(label_path)
+        for i in range(size):
+            yield data[i], label[i]
+
+    return reader
+
+# if __name__ == '__main__':
+#     _test()
