@@ -23,6 +23,7 @@ from captcha.image import ImageCaptcha
 import numpy as np
 import random
 import cv2
+import matplotlib.pyplot as plt
 
 
 def random_numbers():
@@ -76,5 +77,18 @@ def generate_datasets(train_size, test_size):
     np.save('test_label', test_label)
 
 
+def _test():
+    data_path = 'test_data.npy'
+    label_path = 'test_label.npy'
+    data = np.load(data_path)
+    label = np.load(label_path)
+    img = data[3]
+    img = np.reshape(img, [32, 80, 3])
+    print(label[3])
+    plt.imshow(img)
+    plt.axis('off')
+    plt.show()
+
+
 if __name__ == '__main__':
-    generate_datasets(10000, 1000)
+    _test()

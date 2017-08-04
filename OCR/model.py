@@ -35,8 +35,8 @@ def model(x):
         num_channels=3,
         pool_size=2,
         pool_stride=2,
-        conv_num_filter=[64, 64],
-        conv_filter_size=3,
+        conv_num_filter=[32, 32],
+        conv_filter_size=5,
         conv_act=relu,
         conv_with_batchnorm=True,
         pool_type=paddle.pooling.Max()
@@ -44,6 +44,18 @@ def model(x):
 
     conv_2 = paddle.networks.img_conv_group(
         input=conv_1,
+        num_channels=32,
+        pool_size=2,
+        pool_stride=2,
+        conv_num_filter=[64, 64],
+        conv_filter_size=3,
+        conv_act=relu,
+        conv_with_batchnorm=True,
+        pool_type=paddle.pooling.Max()
+    )
+
+    conv_3 = paddle.networks.img_conv_group(
+        input=conv_2,
         num_channels=64,
         pool_size=2,
         pool_stride=2,
@@ -54,8 +66,8 @@ def model(x):
         pool_type=paddle.pooling.Max()
     )
 
-    conv_3 = paddle.networks.img_conv_group(
-        input=conv_2,
+    conv_4 = paddle.networks.img_conv_group(
+        input=conv_3,
         num_channels=128,
         pool_size=2,
         pool_stride=2,
@@ -66,17 +78,12 @@ def model(x):
         pool_type=paddle.pooling.Max()
     )
 
-    conv_4 = paddle.networks.img_conv_group(
-        input=conv_3,
-        num_channels=256,
-        pool_size=2,
-        pool_stride=2,
-        conv_num_filter=[512, 512],
-        conv_filter_size=3,
-        conv_act=relu,
-        conv_with_batchnorm=True,
-        pool_type=paddle.pooling.Max()
-    )
+    # pool_5 = paddle.layer.img_pool(
+    #     input=conv_4,
+    #     stride=2,
+    #     pool_size=2,
+    #     pool_type=paddle.pooling.Max()
+    # )
 
     flatten = paddle.layer.fc(
         input=conv_4,
@@ -116,7 +123,7 @@ LABEL_SIZE = 10
 
 
 def train():
-    paddle.init(use_gpu=False, trainer_count=2)
+    paddle.init(use_gpu=False, trainer_count=1)
 
     x = paddle.layer.data(
         name='image',
@@ -168,10 +175,9 @@ def train():
                }
 
     def event_handler(event):
-
         if isinstance(event, paddle.event.EndIteration):
             if event.batch_id % 50 == 0:
-                print ("\n pass %d, Batch: %d cost: %f metrics: %s" % (event.pass_id, event.batch_id, event.cost, event.metrics))
+                print ("\npass %d, Batch: %d cost: %f metrics: %s" % (event.pass_id, event.batch_id, event.cost, event.metrics))
             else:
                 sys.stdout.write('.')
                 sys.stdout.flush()

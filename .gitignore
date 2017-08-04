@@ -97,3 +97,10 @@ data
 
 # Output
 output
+
+# VSCode
+.vscode
+
+
+# MacOS
+.DS_Store

@@ -22,11 +22,6 @@ SOFTWARE.
 import numpy as np
 
 
-def _test():
-    data_path = 'data/train_data.npy'
-    data = np.load(data_path)
-
-
 def create_reader(type):
     def reader():
         if type == 'train':
@@ -44,5 +39,3 @@ def create_reader(type):
 
     return reader
 
-# if __name__ == '__main__':
-#     _test()
