@@ -40,7 +40,7 @@ def create_reader(type):
         data = np.load(data_path)
         label = np.load(label_path)
         for i in range(size):
-            yield data[i], label[i]
+            yield data[i], label[i][0], label[i][1], label[i][2], label[i][3]
 
     return reader
 

@@ -44,8 +44,8 @@ def model(x):
 
     conv_2 = paddle.networks.img_conv_group(
         input=conv_1,
-        num_channels=3,
-        pool_size=64,
+        num_channels=64,
+        pool_size=2,
         pool_stride=2,
         conv_num_filter=[128, 128],
         conv_filter_size=3,
@@ -56,8 +56,8 @@ def model(x):
 
     conv_3 = paddle.networks.img_conv_group(
         input=conv_2,
-        num_channels=3,
-        pool_size=128,
+        num_channels=128,
+        pool_size=2,
         pool_stride=2,
         conv_num_filter=[256, 256],
         conv_filter_size=3,
@@ -68,8 +68,8 @@ def model(x):
 
     conv_4 = paddle.networks.img_conv_group(
         input=conv_3,
-        num_channels=3,
-        pool_size=256,
+        num_channels=256,
+        pool_size=2,
         pool_stride=2,
         conv_num_filter=[512, 512],
         conv_filter_size=3,
@@ -108,11 +108,7 @@ def model(x):
         act=paddle.activation.Softmax()
     )
 
-    output = paddle.layer.concat(
-        input=[fc_1, fc_2, fc_3, fc_4]
-    )
-
-    return output
+    return [fc_1, fc_2, fc_3, fc_4]
 
 
 IMAGE_SIZE = 32*80*3
@@ -124,18 +120,33 @@ def train():
 
     x = paddle.layer.data(
         name='image',
-        type=paddle.data_type.dense_vector(IMAGE_SIZE)
+        type=paddle.data_type.dense_vector(IMAGE_SIZE),
+        height=32,
+        width=80
     )
 
-    label = paddle.layer.data(
-        name='label',
-        type=paddle.data_type.integer_value_sequence(LABEL_SIZE)
-    )
+    label = []
+    for i in range(4):
+        label_tmp = paddle.layer.data(
+            name='label_part_%s' % i,
+            type=paddle.data_type.integer_value(10)
+        )
+        label.append(label_tmp)
 
     output = model(x)
 
-    loss = paddle.layer.classification_cost(input=output, label=label)
-
+    loss = []
+    for i in range(4):
+        loss_tmp = paddle.layer.classification_cost(
+            input=output[i],
+            label=label[i]
+        )
+        loss.append(loss_tmp)
+    loss = paddle.layer.addto(
+        input=loss,
+        bias_attr=False,
+        act=paddle.activation.Linear()
+    )
     parameters = paddle.parameters.create(loss)
 
     optimizer = paddle.optimizer.Adam(
@@ -146,11 +157,15 @@ def train():
     trainer = paddle.trainer.SGD(
         cost=loss,
         parameters=parameters,
-        update_equation= optimizer
+        update_equation=optimizer
     )
 
     feeding = {'image': 0,
-               'label': 1}
+               'label_part_0': 1,
+               'label_part_1': 2,
+               'label_part_2': 3,
+               'label_part_3': 4,
+               }
 
     def event_handler(event):
 
