@@ -25,12 +25,15 @@ import gzip
 
 
 NUM_CLASS = 10
+IMG_HEIGHT = 32
+IMG_WIDTH = 100
 
 relu = paddle.activation.Relu()
 
 # CNN Layers
 def cnn(image):
-    conv_1 = paddle.networks.img_conv_group(
+
+    conv_group_1 = paddle.networks.img_conv_group(
         input=image,
         num_channels=1,
         pool_size=2,
@@ -41,9 +44,10 @@ def cnn(image):
         conv_with_batchnorm=True,
         pool_type=paddle.pooling.Max()
     )
+    # 16 x 50 x 32
 
-    conv_2 = paddle.networks.img_conv_group(
-        input=conv_1,
+    conv_group_2 = paddle.networks.img_conv_group(
+        input=conv_group_1,
         num_channels=32,
         pool_size=2,
         pool_stride=2,
@@ -53,40 +57,79 @@ def cnn(image):
         conv_with_batchnorm=True,
         pool_type=paddle.pooling.Max()
     )
+    # 8 x 25 x 64
 
-    conv_3 = paddle.networks.img_conv_group(
-        input=conv_2,
+    conv_3 = paddle.layer.img_conv(
+        input=conv_group_2,
         num_channels=64,
-        pool_size=2,
-        pool_stride=2,
-        conv_num_filter=[128, 128],
-        conv_filter_size=3,
-        conv_act=relu,
-        conv_with_batchnorm=True,
-        pool_type=paddle.pooling.Max()
+        num_filters=128,
+        act=relu,
+        stride=1
     )
 
-    conv_4 = paddle.networks.img_conv_group(
+
+    conv_4 = paddle.layer.img_conv(
         input=conv_3,
         num_channels=128,
-        pool_size=2,
-        pool_stride=2,
-        conv_num_filter=[256, 256],
-        conv_filter_size=3,
-        conv_act=relu,
-        conv_with_batchnorm=True,
+        num_filters=128,
+        act=relu,
+        stride=1
+    )
+
+    pool_1 = paddle.layer.img_pool(
+        input=conv_4,
+        pool_size=1,
+        pool_siez_y=2,
+        stride=1,
+        stride_y=2,
         pool_type=paddle.pooling.Max()
     )
-    return conv_4
+    # 4 x 25 x 64
+
+    conv_5 = paddle.layer.img_conv(
+        input=pool_1,
+        num_channels=128,
+        num_filters=256,
+        act=relu,
+        stride=1
+    )
+
+    pool_2 = paddle.layer.img_pool(
+        input=conv_5,
+        pool_size=1,
+        pool_siez_y=2,
+        stride=1,
+        stride_y=2,
+        pool_type=paddle.pooling.Max()
+    )
+
+    conv_6 = paddle.layer.img_conv(
+        input=pool_2,
+        num_channels=256,
+        num_filters=256,
+        act=relu,
+        stride=1
+    )
+
+    pool_3 = paddle.layer.img_pool(
+        input=conv_6,
+        pool_size=1,
+        pool_siez_y=2,
+        stride=1,
+        stride_y=2,
+        pool_type=paddle.pooling.Max()
+    )
+    # 25 x 256
+    return pool_3
 
 
 def bidirection_rnn(x):
-    lstm_1 = paddle.networks.sim_lstm(
+    lstm_fw = paddle.networks.sim_lstm(
         input=x,
         size=128,
         act=relu
     )
-    lstm_2 = paddle.networks.sim_lstm(
+    lstm_bw = paddle.networks.sim_lstm(
         input=x,
         size=128,
         act=relu,
@@ -94,14 +137,45 @@ def bidirection_rnn(x):
     )
 
     res = paddle.layer.fc(
-        input=[lstm_1, lstm_2],
+        input=[lstm_fw, lstm_bw],
         size=NUM_CLASS+1,
-        act=relu
+        act=paddle.activation.Linear()
     )
 
     return res
 
+
 # RNN Layers
-def rnn():
+def rnn(x):
+    x = bidirection_rnn(x)
+    x = bidirection_rnn(x)
+    return x
+
+
+def feature_to_sequences(x):
+    return paddle.layer.block_expand(
+        input=x,
+        num_channels=256,
+        stride_x=1,
+        stride_y=1,
+        block_x=1,
+        block_y=1
+    )
+
+
+def model(x):
+
+    cnn_part = cnn(x)
+    feature_sequence = feature_to_sequences(x)
+    rnn_part = rnn(x)
+
+    return rnn_part
+
+def train():
+    pass
+
+
+
+
 
 
