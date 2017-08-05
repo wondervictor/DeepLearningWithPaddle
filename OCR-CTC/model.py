@@ -65,23 +65,26 @@ def cnn(image):
         input=conv_group_2,
         num_channels=64,
         num_filters=128,
+        filter_size=3,
         act=relu,
-        stride=1
+        stride=1,
+        padding=1
     )
-
 
     conv_4 = paddle.layer.img_conv(
         input=conv_3,
         num_channels=128,
         num_filters=128,
+        filter_size=3,
         act=relu,
-        stride=1
+        stride=1,
+        padding=1
     )
 
     pool_1 = paddle.layer.img_pool(
         input=conv_4,
         pool_size=1,
-        pool_siez_y=2,
+        pool_size_y=2,
         stride=1,
         stride_y=2,
         pool_type=paddle.pooling.Max()
@@ -92,14 +95,16 @@ def cnn(image):
         input=pool_1,
         num_channels=128,
         num_filters=256,
+        filter_size=3,
         act=relu,
-        stride=1
+        stride=1,
+        padding=1
     )
 
     pool_2 = paddle.layer.img_pool(
         input=conv_5,
         pool_size=1,
-        pool_siez_y=2,
+        pool_size_y=2,
         stride=1,
         stride_y=2,
         pool_type=paddle.pooling.Max()
@@ -109,14 +114,16 @@ def cnn(image):
         input=pool_2,
         num_channels=256,
         num_filters=256,
+        filter_size=3,
         act=relu,
-        stride=1
+        stride=1,
+        padding=1
     )
 
     pool_3 = paddle.layer.img_pool(
         input=conv_6,
         pool_size=1,
-        pool_siez_y=2,
+        pool_size_y=2,
         stride=1,
         stride_y=2,
         pool_type=paddle.pooling.Max()
@@ -126,16 +133,16 @@ def cnn(image):
 
 
 def bidirection_rnn(x):
-    lstm_fw = paddle.networks.sim_lstm(
+    lstm_fw = paddle.networks.simple_lstm(
         input=x,
         size=128,
         act=relu
     )
-    lstm_bw = paddle.networks.sim_lstm(
+    lstm_bw = paddle.networks.simple_lstm(
         input=x,
         size=128,
         act=relu,
-        reversed=True
+        reverse=True
     )
 
     res = paddle.layer.fc(
@@ -174,7 +181,7 @@ def model(x):
 
 def train():
 
-    paddle.init(use_gpu=True, trainer_count=2)
+    paddle.init(use_gpu=False, trainer_count=2)
 
     image = paddle.layer.data(
         name='image',
