@@ -82,13 +82,25 @@ def _test():
     label_path = 'train_label.npy'
     data = np.load(data_path)
     label = np.load(label_path)
-    img = data[1]
-    img = np.reshape(img, [32, 80, 3])
-    print(label[1])
-    plt.imshow(img)
-    plt.axis('off')
-    plt.show()
+    # showMany(data[10:14], data[100:104])
+    # img = data[132]
+    # img = np.reshape(img, [32, 80, 3])
+    # print(label[132])
+    # plt.imshow(img)
+    # plt.axis('off')
+    # plt.show()
 
+
+def showMany(images, images2):
+    f, a = plt.subplots(2, 4, figsize=(4, 2))
+    plt.axis('off')
+
+    for i in range(4):
+        a[0][i].imshow(np.reshape(images[i], [32, 80, 3]))
+        a[1][i].imshow(np.reshape(images2[i], [32, 80, 3]))
+    f.show()
+    plt.show()
+    plt.waitforbuttonpress()
 
 if __name__ == '__main__':
     _test()
