@@ -19,3 +19,28 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+import numpy as np
+
+
+def create_reader(type):
+
+    def reader():
+        if type == 'train':
+            size = 4000
+            data_path = 'data/train_data.npy'
+            label_path = 'data/train_label.npy'
+        else:
+            size = 1000
+            data_path = 'data/test_data.npy'
+            label_path = 'data/test_label.npy'
+
+        data = np.load(data_path)
+        label = np.load(label_path)
+
+        for i in range(size):
+            yield data[i], label[i]
+
+    return reader
+
+
+

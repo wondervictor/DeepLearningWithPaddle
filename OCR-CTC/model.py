@@ -22,6 +22,7 @@ SOFTWARE.
 import paddle.v2 as paddle
 import sys
 import gzip
+import data_reader
 
 
 NUM_CLASS = 10
@@ -29,6 +30,7 @@ IMG_HEIGHT = 32
 IMG_WIDTH = 100
 
 relu = paddle.activation.Relu()
+
 
 # CNN Layers
 def cnn(image):
@@ -164,15 +166,89 @@ def feature_to_sequences(x):
 
 
 def model(x):
-
     cnn_part = cnn(x)
-    feature_sequence = feature_to_sequences(x)
-    rnn_part = rnn(x)
-
+    feature_sequence = feature_to_sequences(cnn_part)
+    rnn_part = rnn(feature_sequence)
     return rnn_part
 
+
 def train():
-    pass
+
+    paddle.init(use_gpu=True, trainer_count=2)
+
+    image = paddle.layer.data(
+        name='image',
+        type=paddle.data_type.dense_vector(IMG_HEIGHT*IMG_WIDTH),
+        height=IMG_HEIGHT,
+        width=IMG_WIDTH
+    )
+
+    output = model(image)
+
+    label = paddle.layer.data(
+        name='label',
+        type=paddle.data_type.integer_value_sequence(NUM_CLASS)
+    )
+
+    loss = paddle.layer.warp_ctc(
+        input=output,
+        label=label,
+        size=NUM_CLASS+1,
+        norm_by_times=True,
+        blank=NUM_CLASS
+    )
+
+    feeding = {
+        'image': 0,
+        'label': 1
+    }
+
+    parameters = paddle.parameters.create(loss)
+
+    optimizer = paddle.optimizer.Adam(
+        learning_rate=1e-3,
+        regularization=paddle.optimizer.L2Regularization(rate=8e-4)
+    )
+
+    trainer = paddle.trainer.SGD(
+        cost=loss,
+        parameters=parameters,
+        update_equation=optimizer
+    )
+
+    def event_handler(event):
+        if isinstance(event, paddle.event.EndIteration):
+            if event.batch_id % 50 == 0:
+                print ("\npass %d, Batch: %d cost: %f metrics: %s" % (event.pass_id, event.batch_id, event.cost, event.metrics))
+            else:
+                sys.stdout.write('.')
+                sys.stdout.flush()
+        if isinstance(event, paddle.event.EndPass):
+            # save parameters
+            with gzip.open('output/params_pass_%d.tar.gz' % event.pass_id, 'w') as f:
+                parameters.to_tar(f)
+            test_reader = data_reader.create_reader('test')
+            result = trainer.test(
+                reader=paddle.batch(test_reader, batch_size=128),
+                feeding=feeding)
+            class_error_rate = result.metrics['classification_error_evaluator']
+            print ("\nTest with Pass %d, cost: %s ratio: %f" % (event.pass_id, result.cost,class_error_rate))
+
+    train_reader = data_reader.create_reader('train')
+    reader = paddle.batch(
+        reader=train_reader,
+        batch_size=128
+    )
+
+    trainer.train(
+        reader=reader,
+        feeding=feeding,
+        num_passes=10,
+        event_handler=event_handler
+    )
+
+if __name__ == '__main__':
+    train()
 
 
 
