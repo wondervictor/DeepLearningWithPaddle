@@ -26,7 +26,7 @@ def create_reader(type):
 
     def reader():
         if type == 'train':
-            size = 4000
+            size = 8000
             data_path = 'data/train_data.npy'
             label_path = 'data/train_label.npy'
         else:
@@ -43,4 +43,9 @@ def create_reader(type):
     return reader
 
 
-
+def test(i):
+    data_path = 'data/train_data.npy'
+    label_path = 'data/train_label.npy'
+    data = np.load(data_path)
+    label = np.load(label_path)
+    return data[i], label[i]

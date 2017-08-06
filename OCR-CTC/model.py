@@ -132,7 +132,7 @@ def cnn(image):
     return pool_3
 
 
-def bidirection_rnn(x):
+def bidirection_rnn(x, size, act):
     lstm_fw = paddle.networks.simple_lstm(
         input=x,
         size=128,
@@ -147,8 +147,8 @@ def bidirection_rnn(x):
 
     res = paddle.layer.fc(
         input=[lstm_fw, lstm_bw],
-        size=NUM_CLASS+1,
-        act=paddle.activation.Linear()
+        size=size,
+        act=act
     )
 
     return res
@@ -156,8 +156,8 @@ def bidirection_rnn(x):
 
 # RNN Layers
 def rnn(x):
-    x = bidirection_rnn(x)
-    x = bidirection_rnn(x)
+    x = bidirection_rnn(x, 128, paddle.activation.Relu())
+    x = bidirection_rnn(x, NUM_CLASS+1, paddle.activation.Linear())
     return x
 
 
@@ -181,7 +181,7 @@ def model(x):
 
 def train():
 
-    paddle.init(use_gpu=False, trainer_count=2)
+    paddle.init(use_gpu=False, trainer_count=1)
 
     image = paddle.layer.data(
         name='image',
@@ -197,23 +197,23 @@ def train():
         type=paddle.data_type.integer_value_sequence(NUM_CLASS)
     )
 
-    loss = paddle.layer.warp_ctc(
+    loss = paddle.layer.ctc(
         input=output,
         label=label,
         size=NUM_CLASS+1,
         norm_by_times=True,
-        blank=NUM_CLASS
     )
 
     feeding = {
         'image': 0,
         'label': 1
     }
-
+    # with gzip.open('output/params_pass_0.tar.gz', 'r') as f:
     parameters = paddle.parameters.create(loss)
 
-    optimizer = paddle.optimizer.Adam(
-        learning_rate=1e-3,
+    optimizer = paddle.optimizer.Momentum(
+        momentum=0.9,
+        learning_rate=1e-2,
         regularization=paddle.optimizer.L2Regularization(rate=8e-4)
     )
 
@@ -238,8 +238,7 @@ def train():
             result = trainer.test(
                 reader=paddle.batch(test_reader, batch_size=128),
                 feeding=feeding)
-            class_error_rate = result.metrics['classification_error_evaluator']
-            print ("\nTest with Pass %d, cost: %s ratio: %f" % (event.pass_id, result.cost,class_error_rate))
+            print ("\nTest with Pass %d, cost: %s metrics: %s" % (event.pass_id, result.cost, event.metrics))
 
     train_reader = data_reader.create_reader('train')
     reader = paddle.batch(
@@ -250,12 +249,72 @@ def train():
     trainer.train(
         reader=reader,
         feeding=feeding,
-        num_passes=10,
+        num_passes=50,
         event_handler=event_handler
     )
 
+
+def generate_sequence(x):
+    sequence = []
+    prob_sequence = []
+    for j in range(25):
+        prob = x[j]
+        maxValue = 0.0
+        maxIndex = -1
+        for i in range(11):
+            if maxValue < prob[i]:
+                maxValue = prob[i]
+                maxIndex = i
+        if maxIndex == 10:
+            maxIndex = '-'
+        sequence.append(maxIndex)
+        prob_sequence.append(maxValue)
+    return sequence, prob_sequence
+
+
+def test(x):
+    paddle.init(use_gpu=False, trainer_count=2)
+
+    image = paddle.layer.data(
+        name='image',
+        type=paddle.data_type.dense_vector(IMG_HEIGHT*IMG_WIDTH),
+        height=IMG_HEIGHT,
+        width=IMG_WIDTH
+    )
+
+    with gzip.open('output/params_pass_10.tar.gz', 'r') as f:
+        parameters = paddle.parameters.Parameters.from_tar(f)
+    
+    output = model(image)
+
+    result = paddle.infer(
+        parameters=parameters,
+        output_layer=output,
+        input=x,
+        feeding={
+            'image': 0
+        }
+    )
+
+    return result
+
+
 if __name__ == '__main__':
+
     train()
+
+    # data, label = data_reader.test(400)
+    #
+    # print(label)
+    # data = [[data]]
+    #
+    # res = test(data)
+    # #print(res)
+    # res, probs = generate_sequence(res)
+    # print(probs)
+    # print(res)
+
+
 
 
 

@@ -79,12 +79,12 @@ def _test():
     data = np.load('train_data.npy')
     label = np.load('train_label.npy')
 
-    img = np.reshape(data[1], [32, 100])
-    print(label[1])
+    img = np.reshape(data[100], [32, 100])
+    print(label[100])
     plt.imshow(img)
     plt.show()
 
 
 if __name__ == '__main__':
-    #generate_data(4000, 1000)
+    #generate_data(8000, 1000)
     _test()
