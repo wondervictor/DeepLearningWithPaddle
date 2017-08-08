@@ -77,13 +77,6 @@ def model(x):
         pool_type=paddle.pooling.Max()
     )
 
-    # pool_5 = paddle.layer.img_pool(
-    #     input=conv_4,
-    #     stride=2,
-    #     pool_size=2,
-    #     pool_type=paddle.pooling.Max()
-    # )
-
     flatten = paddle.layer.fc(
         input=conv_4,
         size=512,
@@ -117,8 +110,9 @@ def model(x):
     return [fc_1, fc_2, fc_3, fc_4]
 
 
-IMAGE_SIZE = 32*80*3
 LABEL_SIZE = 10
+
+IMAGE_SIZE = 32*80*3
 
 
 def train():
@@ -148,6 +142,7 @@ def train():
             label=label[i]
         )
         loss.append(loss_tmp)
+
     loss = paddle.layer.addto(
         input=loss,
         bias_attr=False,
@@ -166,12 +161,13 @@ def train():
         update_equation=optimizer
     )
 
-    feeding = {'image': 0,
-               'label_part_0': 1,
-               'label_part_1': 2,
-               'label_part_2': 3,
-               'label_part_3': 4,
-               }
+    feeding = {
+        'image': 0,
+        'label_part_0': 1,
+        'label_part_1': 2,
+        'label_part_2': 3,
+        'label_part_3': 4,
+    }
 
     def event_handler(event):
         if isinstance(event, paddle.event.EndIteration):
@@ -243,9 +239,9 @@ def generate_numbers(result):
 
 
 def test():
-    model_path = '/Users/vic/Dev/DeepLearning/Paddle/DeepLearningWithPaddle/OCR/output/params_pass_9.tar.gz'
+    model_path = 'output/params_pass_9.tar.gz'
     data, label = data_reader.testset()
-    test_samples =[[data[10]]] #[[x] for x in data[10:15]]  #[[x] for x in data[10:20]]
+    test_samples =[[data[10]]]
     s = predict(test_samples, model_path)
     print(s)
     print(label[10])

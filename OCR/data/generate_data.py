@@ -18,11 +18,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-
+import cv2
 from captcha.image import ImageCaptcha
 import numpy as np
 import random
-import cv2
 import matplotlib.pyplot as plt
 
 
@@ -78,17 +77,21 @@ def generate_datasets(train_size, test_size):
 
 
 def _test():
-    data_path = 'train_data.npy'
-    label_path = 'train_label.npy'
-    data = np.load(data_path)
-    label = np.load(label_path)
+    # data_path = 'train_data.npy'
+    # label_path = 'train_label.npy'
+    # data = np.load(data_path)
+    # label = np.load(label_path)
+    captcha = ImageCaptcha(fonts=['OpenSans-Regular.ttf'])
+
+    img = generate_image('4521', captcha)
+
     # showMany(data[10:14], data[100:104])
     # img = data[132]
-    # img = np.reshape(img, [32, 80, 3])
-    # print(label[132])
-    # plt.imshow(img)
-    # plt.axis('off')
-    # plt.show()
+    img = np.reshape(img, [32, 80, 3])
+    #print(label[132])
+    plt.imshow(img)
+    plt.axis('off')
+    plt.show()
 
 
 def showMany(images, images2):

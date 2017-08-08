@@ -21,6 +21,7 @@ SOFTWARE.
 """
 
 import mnist_data
+import numpy as np
 
 
 def create_reader(filename, n):
@@ -30,7 +31,15 @@ def create_reader(filename, n):
         else:
             dataset = mnist_data.fetch_testingset()
         for i in range(n):
-            yield   dataset['images'][i][0:28], \
+            data = np.array(dataset['images'][i])
+            data = np.reshape(data, (28, 28))
+            yield data, dataset['labels'][i]
+
+    return reader
+
+"""
+
+dataset['images'][i][0:28], \
                     dataset['images'][i][28:56], \
                     dataset['images'][i][56:84], \
                     dataset['images'][i][84:112], \
@@ -59,4 +68,4 @@ def create_reader(filename, n):
                     dataset['images'][i][728:756], \
                     dataset['images'][i][756:784], \
                     dataset['labels'][i]
-    return reader
+"""

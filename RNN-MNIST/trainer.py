@@ -40,26 +40,34 @@ def lstm(input, index):
     )
     return lstm_layer
 
-x = []
-for i in range(STEP):
-    tmp_x = paddle.layer.data(
-        name='x_%s' % i,
-        type=paddle.data_type.dense_vector_sequence(STEP)
-    )
-    x.append(tmp_x)
+# x = []
+# for i in range(STEP):
+#     tmp_x = paddle.layer.data(
+#         name='x_%s' % i,
+#         type=paddle.data_type.dense_vector_sequence(STEP)
+#     )
+#     x.append(tmp_x)
+
+
+x = paddle.layer.data(
+    name='image',
+    type=paddle.data_type.dense_vector_sequence(STEP)
+)
 
 
 def model(input_seqs):
-    lstm_seqs = []
-    for i in range(STEP):
-        tmp_lstm = lstm(
-            input=input_seqs[i],
-            index=i
-        )
-        lstm_seqs.append(tmp_lstm)
+
+    lstm_layer = lstm(x,0)
+
+    # for i in range(STEP):
+    #     tmp_lstm = lstm(
+    #         input=input_seqs[i],
+    #         index=i
+    #     )
+    #     lstm_seqs.append(tmp_lstm)
 
     fc_1 = paddle.layer.fc(
-        input=paddle.layer.concat(input=lstm_seqs),
+        input=lstm_layer,
         size=128,
         act=paddle.activation.Relu()
     )
@@ -67,7 +75,6 @@ def model(input_seqs):
         input=fc_1,
         pooling_type=paddle.pooling.Max()
     )
-
     output = paddle.layer.fc(
         input=pool,
         size=CLASS_DIM,
@@ -107,13 +114,17 @@ def train():
     )
 
     feeding = dict()
-    feeding['label'] = 28
-    for i in range(STEP):
-        feeding['x_%s' % i] = i
+    feeding['label'] = 1
+    feeding['image'] = 0
+    # for i in range(STEP):
+    #     feeding['x_%s' % i] = i
 
     def event_handler(event):
 
         if isinstance(event, paddle.event.EndIteration):
+            class_error_rate = event.metrics['classification_error_evaluator']
+            with open('output/train_error1', 'a+') as f:
+                f.write('%f\n' % class_error_rate)
             if event.batch_id % 50 == 0:
                 print ("\n pass %d, Batch: %d cost: %f metrics: %s" % (event.pass_id, event.batch_id, event.cost, event.metrics))
             else:
@@ -128,7 +139,9 @@ def train():
                 reader=paddle.batch(test_reader, batch_size=128),
                 feeding=feeding)
             class_error_rate = result.metrics['classification_error_evaluator']
-            print ("\nTest with Pass %d, cost: %s ratio: %f" % (event.pass_id, result.cost,class_error_rate))
+            with open('output/error1', 'a+') as f:
+                f.write('%f\n' % class_error_rate)
+            print ("\nTest with Pass %d, cost: %s ratio: %f" % (event.pass_id, result.cost, class_error_rate))
 
     reader = data_provider.create_reader('train', 60000)
     trainer.train(
