@@ -144,11 +144,12 @@ def bidirection_rnn(x, size, act):
         act=relu,
         reverse=True
     )
-
     res = paddle.layer.fc(
-        input=[lstm_fw, lstm_bw],
-        size=size,
-        act=act
+        input=paddle.layer.concat(
+            input=[lstm_fw, lstm_bw]
+        ),
+        act=act,
+        size=size
     )
 
     return res
@@ -156,8 +157,8 @@ def bidirection_rnn(x, size, act):
 
 # RNN Layers
 def rnn(x):
-    x = bidirection_rnn(x, 128, paddle.activation.Relu())
-    x = bidirection_rnn(x, NUM_CLASS+1, paddle.activation.Linear())
+    x = bidirection_rnn(x, 128, paddle.activation.Linear())
+    x = bidirection_rnn(x, NUM_CLASS+1, paddle.activation.Softmax())
     return x
 
 
@@ -200,8 +201,7 @@ def train():
     loss = paddle.layer.ctc(
         input=output,
         label=label,
-        size=NUM_CLASS+1,
-        norm_by_times=True,
+        size=NUM_CLASS+1
     )
 
     feeding = {
@@ -211,9 +211,8 @@ def train():
     # with gzip.open('output/params_pass_0.tar.gz', 'r') as f:
     parameters = paddle.parameters.create(loss)
 
-    optimizer = paddle.optimizer.Momentum(
-        momentum=0.9,
-        learning_rate=1e-2,
+    optimizer = paddle.optimizer.Adam(
+        learning_rate=0.05,
         regularization=paddle.optimizer.L2Regularization(rate=8e-4)
     )
 
@@ -225,10 +224,10 @@ def train():
 
     def event_handler(event):
         if isinstance(event, paddle.event.EndIteration):
-            if event.batch_id % 50 == 0:
-                print ("\npass %d, Batch: %d cost: %f metrics: %s" % (event.pass_id, event.batch_id, event.cost, event.metrics))
+            if (event.batch_id+1) % 5 == 0:
+                print ("\npass %d, Batch: %d cost: %f" % (event.pass_id+1, event.batch_id+1, event.cost))
             else:
-                sys.stdout.write('.')
+                sys.stdout.write('*')
                 sys.stdout.flush()
         if isinstance(event, paddle.event.EndPass):
             # save parameters
@@ -273,7 +272,7 @@ def generate_sequence(x):
 
 
 def test(x):
-    paddle.init(use_gpu=False, trainer_count=2)
+    paddle.init(use_gpu=False, trainer_count=1)
 
     image = paddle.layer.data(
         name='image',
@@ -305,11 +304,10 @@ if __name__ == '__main__':
 
     # data, label = data_reader.test(400)
     #
-    # print(label)
     # data = [[data]]
     #
     # res = test(data)
-    # #print(res)
+    #
     # res, probs = generate_sequence(res)
     # print(probs)
     # print(res)
