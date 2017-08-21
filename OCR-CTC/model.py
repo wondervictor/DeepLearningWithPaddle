@@ -157,8 +157,8 @@ def bidirection_rnn(x, size, act):
 
 # RNN Layers
 def rnn(x):
-    x = bidirection_rnn(x, 128, paddle.activation.Linear())
     x = bidirection_rnn(x, NUM_CLASS+1, paddle.activation.Softmax())
+    #x = bidirection_rnn(x, NUM_CLASS+1, paddle.activation.Softmax())
     return x
 
 
@@ -211,8 +211,9 @@ def train():
     # with gzip.open('output/params_pass_0.tar.gz', 'r') as f:
     parameters = paddle.parameters.create(loss)
 
-    optimizer = paddle.optimizer.Adam(
-        learning_rate=0.05,
+    optimizer = paddle.optimizer.Momentum(
+        momentum=0.9,
+        learning_rate=0.01,
         regularization=paddle.optimizer.L2Regularization(rate=8e-4)
     )
 
@@ -224,7 +225,7 @@ def train():
 
     def event_handler(event):
         if isinstance(event, paddle.event.EndIteration):
-            if (event.batch_id+1) % 5 == 0:
+            if event.batch_id % 5 == 0:
                 print ("\npass %d, Batch: %d cost: %f" % (event.pass_id+1, event.batch_id+1, event.cost))
             else:
                 sys.stdout.write('*')
@@ -237,7 +238,7 @@ def train():
             result = trainer.test(
                 reader=paddle.batch(test_reader, batch_size=128),
                 feeding=feeding)
-            print ("\nTest with Pass %d, cost: %s metrics: %s" % (event.pass_id, result.cost, event.metrics))
+            print ("\nTest with Pass %d, cost: %s" % (event.pass_id+1, result.cost))
 
     train_reader = data_reader.create_reader('train')
     reader = paddle.batch(
@@ -281,7 +282,7 @@ def test(x):
         width=IMG_WIDTH
     )
 
-    with gzip.open('output/params_pass_10.tar.gz', 'r') as f:
+    with gzip.open('output/params_pass_1.tar.gz', 'r') as f:
         parameters = paddle.parameters.Parameters.from_tar(f)
     
     output = model(image)
@@ -300,17 +301,17 @@ def test(x):
 
 if __name__ == '__main__':
 
-    train()
+    #train()
 
-    # data, label = data_reader.test(400)
-    #
-    # data = [[data]]
-    #
-    # res = test(data)
-    #
-    # res, probs = generate_sequence(res)
-    # print(probs)
-    # print(res)
+    data, label = data_reader.test(1)
+
+    data = [[data]]
+
+    res = test(data)
+    print(res)
+    res, probs = generate_sequence(res)
+    print(probs)
+    print(res)
 
 
 
