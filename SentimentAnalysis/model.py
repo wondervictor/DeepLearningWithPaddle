@@ -129,7 +129,7 @@ def train():
             with gzip.open('output/params_pass_%d.tar.gz' % event.pass_id, 'w') as f:
                 parameters.to_tar(f)
             result = trainer.test(
-                reader=paddle.batch(test_data_reader, batch_size=128),
+                reader=paddle.batch(test_data_reader, batch_size=32),
                 feeding=feeding)
             class_error_rate = result.metrics['classification_error_evaluator']
             print ("\nTest with Pass %d, cost: %s error: %f" % (event.pass_id, result.cost,class_error_rate))
@@ -137,7 +137,7 @@ def train():
     trainer.train(
         reader=paddle.batch(
             train_data_reader,
-            batch_size=128
+            batch_size=32
         ),
         event_handler=event_handler,
         num_passes=10,

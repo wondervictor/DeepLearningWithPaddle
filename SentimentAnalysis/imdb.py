@@ -42,12 +42,13 @@ class Imdb(object):
         testset = zip(testset[0], testset[1])
         trainset += testset[:10000]
         testset = testset[10000:]
-        trainset = random.shuffle(trainset)
-        testset = random.shuffle(testset)
+        random.shuffle(trainset)
+        random.shuffle(testset)
         self._trainset = trainset
         self._testset = testset
 
     def create_reader(self, type):
+
         def reader():
             if type == 'train':
                 dataset = self._trainset
@@ -62,7 +63,12 @@ class Imdb(object):
 
 
 
+def test():
+    dataset = Imdb('data/imdb.pkl')
+    reader = dataset.create_reader('test')
+    reader()
 
 
+#test()
 
 
