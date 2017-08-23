@@ -20,47 +20,4 @@ SOFTWARE.
 """
 
 
-import numpy as np
-import cPickle as pickle
-import random
-
-# dict_dim = 102100
-
-class Imdb(object):
-
-    def __init__(self, dataset_path):
-        f = open(dataset_path, 'rb')
-        trainset = np.array(pickle.load(f))
-        testset = np.array(pickle.load(f))
-        f.close()
-
-        trainset = zip(trainset[0], trainset[1])
-        testset = zip(testset[0], testset[1])
-        # shuffle 数据集顺序
-        random.shuffle(trainset)
-        random.shuffle(testset)
-        self._trainset = trainset
-        self._testset = testset
-
-    def create_reader(self, type):
-
-        def reader():
-            if type == 'train':
-                dataset = self._trainset
-            else:
-                dataset = self._testset
-            for i in range(25000):
-                yield dataset[i][0], dataset[i][1]
-
-        return reader
-
-
-def test():
-    dataset = Imdb('data/imdb.pkl')
-    reader = dataset.create_reader('test')
-    reader()
-
-
-#test()
-
 

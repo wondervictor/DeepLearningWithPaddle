@@ -120,7 +120,8 @@ def train():
         if isinstance(event, paddle.event.EndIteration):
             if event.batch_id % 5 == 0:
                 class_error_rate = event.metrics['classification_error_evaluator']
-                print ("\npass %d, Batch: %d cost: %f error: %s" % (event.pass_id, event.batch_id, event.cost, class_error_rate))
+                print ("\npass %d, Batch: %d cost: %f error: %s"
+                       % (event.pass_id, event.batch_id, event.cost, class_error_rate))
             else:
                 sys.stdout.write('.')
                 sys.stdout.flush()
@@ -132,7 +133,8 @@ def train():
                 reader=paddle.batch(test_data_reader, batch_size=32),
                 feeding=feeding)
             class_error_rate = result.metrics['classification_error_evaluator']
-            print ("\nTest with Pass %d, cost: %s error: %f" % (event.pass_id, result.cost,class_error_rate))
+            print ("\nTest with Pass %d, cost: %s error: %f"
+                   % (event.pass_id, result.cost,class_error_rate))
 
     trainer.train(
         reader=paddle.batch(
@@ -143,6 +145,8 @@ def train():
         num_passes=10,
         feeding=feeding
     )
+
+
 
 
 if __name__ == '__main__':
