@@ -20,9 +20,13 @@ SOFTWARE.
 """
 
 import paddle.v2 as paddle
+import paddle.trainer_config_helpers as tch
+import sys
+import gzip
+import data_provider as dp
 
 learning_rate = 0.01
-dict_dim = 10
+dict_dim = 4469
 
 
 def seq2seq(encoder_size, decoder_size, is_train):
@@ -38,17 +42,20 @@ def seq2seq(encoder_size, decoder_size, is_train):
     )
 
     # encoder
-    encoder_lstm = paddle.networks.bidirectional_lstm(
+    encoded_vector = paddle.networks.bidirectional_gru(
         input=input_data_embedding,
         size=encoder_size,
-        return_seq=True
-    )
+        fwd_act=paddle.activation.Tanh(),
+        fwd_gate_act=paddle.activation.Sigmoid(),
+        bwd_act=paddle.activation.Tanh(),
+        bwd_gate_act=paddle.activation.Sigmoid(),
+        return_seq=True)
 
     last_encoder = paddle.layer.last_seq(
-        input=encoder_lstm
+        input=encoded_vector
     )
 
-    def _decoder(encoded_vector, current_input):
+    def _decoder(encoded_vec, current_input):
 
         memory_boot_layer = paddle.layer.fc(
             input=last_encoder,
@@ -58,16 +65,18 @@ def seq2seq(encoder_size, decoder_size, is_train):
 
         decoder_memory = paddle.layer.memory(
             size=decoder_size,
-            boot_layer=memory_boot_layer
+            boot_layer=memory_boot_layer,
+            name='gru_decoder'
         )
 
-        encoded_context = paddle.last_seq(input=encoded_vector)
+        encoded_context = paddle.layer.last_seq(input=encoded_vec)
         input_data = paddle.layer.fc(
             input=[encoded_context, current_input],
             size=decoder_size * 3
         )
 
         step = paddle.layer.gru_step(
+            name='gru_decoder',
             input=input_data,
             size=decoder_size,
             output_mem=decoder_memory
@@ -82,7 +91,7 @@ def seq2seq(encoder_size, decoder_size, is_train):
 
     if is_train:
         current_input_word = paddle.layer.data(
-            input='output_word',
+            name='output_word',
             type=paddle.data_type.integer_value_sequence(dict_dim)
         )
 
@@ -92,12 +101,13 @@ def seq2seq(encoder_size, decoder_size, is_train):
             name='current_word_embedding'
         )
 
-        group_inputs = [paddle.layer.StaticInput(input=encoder_lstm)]
+        group_inputs = [paddle.layer.StaticInput(input=encoded_vector)]
         group_inputs.append(current_word_embedding)
 
         decoder = paddle.layer.recurrent_group(
             step=_decoder,
-            input=group_inputs
+            input=group_inputs,
+            name='decoder_group'
         )
 
         label = paddle.layer.data(
@@ -116,21 +126,82 @@ def seq2seq(encoder_size, decoder_size, is_train):
             embedding_size=512
         )
 
-        group_inputs = [paddle.layer.StaticInput(input=encoder_lstm)]
+        group_inputs = [paddle.layer.StaticInput(input=encoded_vector)]
         group_inputs.append(current_word_embedding)
 
         result = paddle.layer.beam_search(
+            name='decoder_group',
             input=group_inputs,
             step=_decoder,
             bos_id=0,
             eos_id=1,
             beam_size=1,
-            max_length=20
+            max_length=30
         )
 
         return result
 
+
 def train():
+
+    paddle.init(use_gpu=False, trainer_count=1)
+
+    cost = seq2seq(512, 512, True)
+
+    parameters = paddle.parameters.create(cost)
+
+    optimizer = paddle.optimizer.AdaDelta(
+        learning_rate=learning_rate,
+        regularization=paddle.optimizer.L2Regularization(rate=5e-4)
+    )
+
+    trainer = paddle.trainer.SGD(
+        cost=cost,
+        parameters=parameters,
+        update_equation=optimizer
+    )
+
+    feeding = {
+        'input_sentence': 0,
+        'output_word': 1,
+        'label_word': 2
+    }
+
+    train_reader = dp.create_reader(True)
+
+
+    def event_handler(event):
+        if isinstance(event, paddle.event.EndIteration):
+            if event.batch_id % 5 == 0:
+                class_error_rate = event.metrics['classification_error_evaluator']
+                print ("\npass %d, Batch: %d cost: %f error: %s"
+                       % (event.pass_id, event.batch_id, event.cost, class_error_rate))
+            else:
+                sys.stdout.write('.')
+                sys.stdout.flush()
+        if isinstance(event, paddle.event.EndPass):
+            # save parameters
+            with gzip.open('output/params_pass_%d.tar.gz' % event.pass_id, 'w') as f:
+                parameters.to_tar(f)
+
+    trainer.train(
+        num_passes=10,
+        event_handler=event_handler,
+        feeding=feeding,
+        reader=paddle.batch(
+            reader=train_reader,
+            batch_size=64
+        )
+    )
+
+
+train()
+
+
+
+
+
+
 
 
 

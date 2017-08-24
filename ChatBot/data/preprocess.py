@@ -86,14 +86,14 @@ def split_dataset(questions, answers, testset_size, trainset_size):
 
     while i < trainset_size:
         conv_index = indexes[i]
-        if len(questions[conv_index]) < 30 and len(answers[conv_index]) < 30:
+        if len(questions[conv_index]) < 30 and len(answers[conv_index]) < 30 and  len(questions[conv_index]) > 0 and len(answers[conv_index]) > 0:
             train_answers.append(answers[conv_index])
             train_questions.append(questions[conv_index])
         i += 1
 
     while i < trainset_size+testset_size:
         conv_index = indexes[i]
-        if len(questions[conv_index]) < 30 and len(answers[conv_index]) < 30:
+        if len(questions[conv_index]) < 30 and len(answers[conv_index]) < 30 and  len(questions[conv_index]) > 0 and len(answers[conv_index]) > 0:
             test_answers.append(answers[conv_index])
             test_questions.append(questions[conv_index])
         i += 1
