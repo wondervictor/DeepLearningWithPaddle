@@ -20,7 +20,9 @@ SOFTWARE.
 """
 
 import random
-
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
 # __all___ = []
 
 conv_file_path = 'dgk_shooter_min.conv'
@@ -69,31 +71,41 @@ def generate_question_answers(conversations):
 
 
 def split_dataset(questions, answers, testset_size, trainset_size):
+
+    print('Splitting')
+
     train_questions = []
     train_answers = []
     test_questions = []
     test_answers = []
 
-    test_index = random.sample([i for i in range(len(questions))], testset_size)
-
     indexes = range(len(questions))
 
     random.shuffle(indexes)
+    i = 0
 
-    for i in indexes:
-        if i in test_index:
-            test_questions.append(questions[i])
-            test_answers.append(answers[i])
-        else:
-            train_questions.append(questions[i])
-            train_answers.append(answers[i])
+    while i < trainset_size:
+        conv_index = indexes[i]
+        if len(questions[conv_index]) < 30 and len(answers[conv_index]) < 30:
+            train_answers.append(answers[conv_index])
+            train_questions.append(questions[conv_index])
+        i += 1
+
+    while i < trainset_size+testset_size:
+        conv_index = indexes[i]
+        if len(questions[conv_index]) < 30 and len(answers[conv_index]) < 30:
+            test_answers.append(answers[conv_index])
+            test_questions.append(questions[conv_index])
+        i += 1
+
     trainset = dict()
-    trainset['questions'] = train_questions[:trainset_size]
-    trainset['answers'] = train_answers[:trainset_size]
+    trainset['questions'] = train_questions
+    trainset['answers'] = train_answers
 
     testset = dict()
     testset['questions'] = test_questions
     testset['answers'] = test_answers
+    print('Finishing splitting')
 
     return trainset, testset
 
@@ -123,15 +135,14 @@ def build_vocabulary(trainset, testset, vocabulary_size=10000):
                 vocabulary[token] += 1
             else:
                 vocabulary[token] = 1
-
+    print("dictionary size %s" % len(vocabulary))
     vocabulary_list = [PAD, GO, EOS, UNK] + sorted(vocabulary, key=vocabulary.get, reverse=True)
     if len(vocabulary_list) > vocabulary_size:
         vocabulary_list = vocabulary_list[:vocabulary_size]
     print("Finishing building")
     print("Saving the dictionary")
     with open('dictionary', 'w') as f:
-        for token in vocabulary_list:
-            f.write(token + '\n')
+        f.write('\n'.join(vocabulary_list))
     print("Finishing saving the dictionary")
 
 
@@ -140,7 +151,7 @@ def load_vocabulary(vocabulary_path):
     f = open(vocabulary_path, 'r')
     vocabulary_lines = f.readlines()
     f.close()
-    vocabulary_list = [token.rstrip('\n') for token in vocabulary_lines]
+    vocabulary_list = [token.decode('utf-8').rstrip('\n') for token in vocabulary_lines]
     vocabulary_dict = dict([(x, y) for (y, x) in enumerate(vocabulary_list)])
     del vocabulary_lines
     del vocabulary_list
@@ -166,7 +177,16 @@ def convert_sentence_to_vector(sentences, vocabulary, outputfile):
     print("Saving to file: %s" % outputfile)
 
 
-
+def generate_data_model_dataset(path='dgk_shooter_min.conv'):
+    conversations = collect_conversations(path)
+    questions, answers = generate_question_answers(conversations)
+    trainset, testset = split_dataset(questions, answers, 10000, 50000)
+    build_vocabulary(trainset, testset)
+    vocabulary = load_vocabulary('dictionary')
+    convert_sentence_to_vector(trainset['questions'], vocabulary, 'train_questions')
+    convert_sentence_to_vector(trainset['answers'], vocabulary, 'train_answers')
+    convert_sentence_to_vector(testset['questions'], vocabulary, 'test_questions')
+    convert_sentence_to_vector(testset['answers'], vocabulary, 'test_answers')
 
 
 
@@ -174,9 +194,9 @@ def convert_sentence_to_vector(sentences, vocabulary, outputfile):
 
 
 def test():
-    print("testing")
-    #convs = collect_conversations(conv_file_path)
-    #print(convs[2][1])
+    print("[TESTING]")
+    generate_data_model_dataset()
+    print("[TESTING END]")
 
 
 test()
