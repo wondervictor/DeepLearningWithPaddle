@@ -26,7 +26,7 @@ import matplotlib.pyplot as plt
 
 
 def generate_num():
-    nums = random.randint(1000, 99999999)
+    nums = random.randint(1000, 999999)
     code = str(nums)
     label = [int(j) for j in code]
     return code, label
@@ -37,7 +37,8 @@ def generate_image(code, captcha):
     img = np.fromstring(img.getvalue(), dtype='uint8')
     img = cv2.imdecode(img, cv2.IMREAD_COLOR)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    img = cv2.resize(img, (100, 32))
+
+    img = cv2.resize(img, (80, 32))
     img = np.multiply(img, 1 / 255.0)
     img = np.reshape(img, [-1])
     return img
@@ -76,11 +77,15 @@ def generate_data(training_size, testing_size):
 
 
 def _test():
-    data = np.load('train_data.npy')
-    label = np.load('train_label.npy')
+    # data = np.load('train_data.npy')
+    # label = np.load('train_label.npy')
+    captcha = ImageCaptcha(fonts=['OpenSans-Regular.ttf'])
 
-    img = np.reshape(data[100], [32, 100])
-    print(label[100])
+    code, label = generate_num()
+    img = generate_image(code, captcha)
+    img = np.reshape(img, [32, 80])
+    print(img[1])
+    print(label)
     plt.imshow(img)
     plt.show()
 

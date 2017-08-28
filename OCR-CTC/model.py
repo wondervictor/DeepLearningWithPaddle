@@ -27,7 +27,7 @@ import data_reader
 
 NUM_CLASS = 10
 IMG_HEIGHT = 32
-IMG_WIDTH = 100
+IMG_WIDTH = 80
 
 relu = paddle.activation.Relu()
 
@@ -81,7 +81,7 @@ def cnn(image):
         padding=1
     )
 
-    pool_1 = paddle.layer.img_pool(
+    pool_2 = paddle.layer.img_pool(
         input=conv_4,
         pool_size=1,
         pool_size_y=2,
@@ -92,7 +92,7 @@ def cnn(image):
     # 4 x 25 x 64
 
     conv_5 = paddle.layer.img_conv(
-        input=pool_1,
+        input=pool_2,
         num_channels=128,
         num_filters=256,
         filter_size=3,
@@ -101,7 +101,7 @@ def cnn(image):
         padding=1
     )
 
-    pool_2 = paddle.layer.img_pool(
+    pool_3 = paddle.layer.img_pool(
         input=conv_5,
         pool_size=1,
         pool_size_y=2,
@@ -111,7 +111,7 @@ def cnn(image):
     )
 
     conv_6 = paddle.layer.img_conv(
-        input=pool_2,
+        input=pool_3,
         num_channels=256,
         num_filters=256,
         filter_size=3,
@@ -120,16 +120,14 @@ def cnn(image):
         padding=1
     )
 
-    pool_3 = paddle.layer.img_pool(
+    pool_4 = paddle.layer.img_pool(
         input=conv_6,
-        pool_size=1,
-        pool_size_y=2,
-        stride=1,
-        stride_y=2,
+        pool_size=2,
+        stride=2,
         pool_type=paddle.pooling.Max()
     )
     # 25 x 256
-    return pool_3
+    return pool_4
 
 
 def bidirection_rnn(x, size, act):
@@ -182,7 +180,7 @@ def model(x):
 
 def train():
 
-    paddle.init(use_gpu=False, trainer_count=1)
+    paddle.init(use_gpu=False, trainer_count=2)
 
     image = paddle.layer.data(
         name='image',
@@ -211,8 +209,7 @@ def train():
     # with gzip.open('output/params_pass_0.tar.gz', 'r') as f:
     parameters = paddle.parameters.create(loss)
 
-    optimizer = paddle.optimizer.Momentum(
-        momentum=0.9,
+    optimizer = paddle.optimizer.RMSProp(
         learning_rate=0.01,
         regularization=paddle.optimizer.L2Regularization(rate=8e-4)
     )
@@ -236,14 +233,14 @@ def train():
                 parameters.to_tar(f)
             test_reader = data_reader.create_reader('test')
             result = trainer.test(
-                reader=paddle.batch(test_reader, batch_size=128),
+                reader=paddle.batch(test_reader, batch_size=32),
                 feeding=feeding)
             print ("\nTest with Pass %d, cost: %s" % (event.pass_id+1, result.cost))
 
     train_reader = data_reader.create_reader('train')
     reader = paddle.batch(
         reader=train_reader,
-        batch_size=128
+        batch_size=32
     )
 
     trainer.train(
@@ -257,7 +254,7 @@ def train():
 def generate_sequence(x):
     sequence = []
     prob_sequence = []
-    for j in range(25):
+    for j in range(10):
         prob = x[j]
         maxValue = 0.0
         maxIndex = -1
@@ -282,7 +279,7 @@ def test(x):
         width=IMG_WIDTH
     )
 
-    with gzip.open('output/params_pass_1.tar.gz', 'r') as f:
+    with gzip.open('output/params_pass_7.tar.gz', 'r') as f:
         parameters = paddle.parameters.Parameters.from_tar(f)
     
     output = model(image)
@@ -303,15 +300,20 @@ if __name__ == '__main__':
 
     #train()
 
-    data, label = data_reader.test(1)
+    # 200
+    # [3, '-', 2, 2, 9, '-', 9, '-', 8, 4]
+    # [3, 2, 9, 9, 8, 4]
+
+    data, label = data_reader.test(200)
 
     data = [[data]]
-
     res = test(data)
     print(res)
     res, probs = generate_sequence(res)
     print(probs)
     print(res)
+    print(label)
+
 
 
 
