@@ -25,7 +25,9 @@ import sys
 import gzip
 import data_provider as dp
 
-learning_rate = 0.01
+import seq2seq as seq_model
+
+learning_rate = 0.05
 dict_dim = 4469
 
 
@@ -49,7 +51,8 @@ def seq2seq(encoder_size, decoder_size, is_train):
         fwd_gate_act=paddle.activation.Sigmoid(),
         bwd_act=paddle.activation.Tanh(),
         bwd_gate_act=paddle.activation.Sigmoid(),
-        return_seq=True)
+        return_seq=True
+    )
 
     last_encoder = paddle.layer.last_seq(
         input=encoded_vector
@@ -70,6 +73,7 @@ def seq2seq(encoder_size, decoder_size, is_train):
         )
 
         encoded_context = paddle.layer.last_seq(input=encoded_vec)
+
         input_data = paddle.layer.fc(
             input=[encoded_context, current_input],
             size=decoder_size * 3
@@ -101,7 +105,7 @@ def seq2seq(encoder_size, decoder_size, is_train):
             name='current_word_embedding'
         )
 
-        group_inputs = [paddle.layer.StaticInput(input=encoded_vector)]
+        group_inputs = [paddle.layer.StaticInputV2(input=encoded_vector)]
         group_inputs.append(current_word_embedding)
 
         decoder = paddle.layer.recurrent_group(
@@ -126,7 +130,7 @@ def seq2seq(encoder_size, decoder_size, is_train):
             embedding_size=512
         )
 
-        group_inputs = [paddle.layer.StaticInput(input=encoded_vector)]
+        group_inputs = [paddle.layer.StaticInputV2(input=encoded_vector)]
         group_inputs.append(current_word_embedding)
 
         result = paddle.layer.beam_search(
@@ -146,13 +150,12 @@ def train():
 
     paddle.init(use_gpu=False, trainer_count=1)
 
-    cost = seq2seq(512, 512, True)
+    cost = seq_model.seqToseq_net(dict_dim, dict_dim, is_generating=False) #seq2seq(512, 512, True)
 
     parameters = paddle.parameters.create(cost)
 
     optimizer = paddle.optimizer.AdaDelta(
         learning_rate=learning_rate,
-        regularization=paddle.optimizer.L2Regularization(rate=5e-4)
     )
 
     trainer = paddle.trainer.SGD(
@@ -187,7 +190,6 @@ def train():
     trainer.train(
         num_passes=10,
         event_handler=event_handler,
-        feeding=feeding,
         reader=paddle.batch(
             reader=train_reader,
             batch_size=64
@@ -195,10 +197,31 @@ def train():
     )
 
 
+def test():
+
+
+
+    input_seq = [72, 16, 13, 7, 501, 157, 157, 250, 29, 368, 313, 5, 60, 166]
+
+    paddle.init(use_gpu=False, trainer_count=1)
+    output = seq_model.seqToseq_net(dict_dim,dict_dim,True)
+
+    with gzip.open('output/params_pass_1.tar.gz', 'r') as f:
+        parameters = paddle.parameters.Parameters.from_tar(f)
+
+    result = paddle.infer(
+        output_layer=output,
+        input=[(input_seq,)],
+        parameters=parameters,
+        field=['prob', 'id']
+    )
+
+    print(result)
+
+
+#test()
+
 train()
-
-
-
 
 
 

@@ -814,68 +814,512 @@ pass 8, Batch: 246 cost: 0.515180
 ****
 Test with Pass 8, cost: 0.416434062809
 
-pass 9, Batch: 1 cost: 0.031401
+pass 1, Batch: 1 cost: 0.031401
 ****
-pass 9, Batch: 6 cost: 0.217620
+pass 1, Batch: 6 cost: 1.116317
 ****
-pass 9, Batch: 11 cost: 0.057836
+pass 1, Batch: 11 cost: 0.079111
 ****
-pass 9, Batch: 16 cost: 0.008510
+pass 1, Batch: 16 cost: 0.043831
 ****
-pass 9, Batch: 21 cost: 0.072319
+pass 1, Batch: 21 cost: 0.012929
 ****
-pass 9, Batch: 26 cost: 0.048714
+pass 1, Batch: 26 cost: 0.089462
 ****
-pass 9, Batch: 31 cost: 0.035632
+pass 1, Batch: 31 cost: 0.012215
 ****
-pass 9, Batch: 36 cost: 0.194219
+pass 1, Batch: 36 cost: 0.091739
 ****
-pass 9, Batch: 41 cost: 0.058257
+pass 1, Batch: 41 cost: 0.080344
 ****
-pass 9, Batch: 46 cost: 0.032731
+pass 1, Batch: 46 cost: 0.005223
 ****
-pass 9, Batch: 51 cost: 0.065903
+pass 1, Batch: 51 cost: 0.017456
 ****
-pass 9, Batch: 56 cost: 0.018193
+pass 1, Batch: 56 cost: 0.071169
 ****
-pass 9, Batch: 61 cost: 0.113325
+pass 1, Batch: 61 cost: 0.047906
 ****
-pass 9, Batch: 66 cost: 0.175342
+pass 1, Batch: 66 cost: 0.128775
 ****
-pass 9, Batch: 71 cost: 0.030293
+pass 1, Batch: 71 cost: 0.010648
 ****
-pass 9, Batch: 76 cost: 0.122989
+pass 1, Batch: 76 cost: 0.307773
 ****
-pass 9, Batch: 81 cost: 0.061256
+pass 1, Batch: 81 cost: 0.339588
 ****
-pass 9, Batch: 86 cost: 0.042879
+pass 1, Batch: 86 cost: 0.034555
 ****
-pass 9, Batch: 91 cost: 0.104885
+pass 1, Batch: 91 cost: 0.197354
 ****
-pass 9, Batch: 96 cost: 0.023871
+pass 1, Batch: 96 cost: 0.016371
 ****
-pass 9, Batch: 101 cost: 0.341462
+pass 1, Batch: 101 cost: 0.135449
 ****
-pass 9, Batch: 106 cost: 0.010076
+pass 1, Batch: 106 cost: 0.014176
 ****
-pass 9, Batch: 111 cost: 0.025787
+pass 1, Batch: 111 cost: 0.056883
 ****
-pass 9, Batch: 116 cost: 0.126836
+pass 1, Batch: 116 cost: 0.313574
 ****
-pass 9, Batch: 121 cost: 0.018619
+pass 1, Batch: 121 cost: 0.191567
 ****
-pass 9, Batch: 126 cost: 0.227911
+pass 1, Batch: 126 cost: 0.103776
 ****
-pass 9, Batch: 131 cost: 0.119436
+pass 1, Batch: 131 cost: 0.009312
 ****
-pass 9, Batch: 136 cost: 0.221501
+pass 1, Batch: 136 cost: 0.019269
 ****
-pass 9, Batch: 141 cost: 0.017500
+pass 1, Batch: 141 cost: 0.037480
 ****
-pass 9, Batch: 146 cost: 0.301554
+pass 1, Batch: 146 cost: 0.026833
 ****
-pass 9, Batch: 151 cost: 0.089569
+pass 1, Batch: 151 cost: 0.122129
 ****
-pass 9, Batch: 156 cost: 0.089816
+pass 1, Batch: 156 cost: 0.173772
 ****
-pass 9, Batch: 161 cost: 0.221247
+pass 1, Batch: 161 cost: 0.669732
+****
+pass 1, Batch: 166 cost: 0.028619
+****
+pass 1, Batch: 171 cost: 0.008644
+****
+pass 1, Batch: 176 cost: 0.126355
+****
+pass 1, Batch: 181 cost: 0.146451
+****
+pass 1, Batch: 186 cost: 0.079825
+****
+pass 1, Batch: 191 cost: 0.009827
+****
+pass 1, Batch: 196 cost: 0.015927
+****
+pass 1, Batch: 201 cost: 0.067965
+****
+pass 1, Batch: 206 cost: 0.471826
+****
+pass 1, Batch: 211 cost: 0.210117
+****
+pass 1, Batch: 216 cost: 0.040278
+****
+pass 1, Batch: 221 cost: 0.273325
+****
+pass 1, Batch: 226 cost: 0.031354
+****
+pass 1, Batch: 231 cost: 0.214134
+****
+pass 1, Batch: 236 cost: 0.470545
+****
+pass 1, Batch: 241 cost: 0.137809
+****
+pass 1, Batch: 246 cost: 0.126959
+****
+Test with Pass 1, cost: 0.366176078156
+
+pass 2, Batch: 1 cost: 0.015408
+****
+pass 2, Batch: 6 cost: 0.329583
+****
+pass 2, Batch: 11 cost: 0.011856
+****
+pass 2, Batch: 16 cost: 0.017092
+****
+pass 2, Batch: 21 cost: 0.026127
+****
+pass 2, Batch: 26 cost: 0.028866
+****
+pass 2, Batch: 31 cost: 0.074730
+****
+pass 2, Batch: 36 cost: 0.128848
+****
+pass 2, Batch: 41 cost: 0.167306
+****
+pass 2, Batch: 46 cost: 0.013791
+****
+pass 2, Batch: 51 cost: 0.136619
+****
+pass 2, Batch: 56 cost: 0.045214
+****
+pass 2, Batch: 61 cost: 0.178146
+****
+pass 2, Batch: 66 cost: 0.199132
+****
+pass 2, Batch: 71 cost: 0.031339
+****
+pass 2, Batch: 76 cost: 0.167683
+****
+pass 2, Batch: 81 cost: 0.085614
+****
+pass 2, Batch: 86 cost: 0.019263
+****
+pass 2, Batch: 91 cost: 0.094118
+****
+pass 2, Batch: 96 cost: 0.006672
+****
+pass 2, Batch: 101 cost: 0.039967
+****
+pass 2, Batch: 106 cost: 0.007368
+****
+pass 2, Batch: 111 cost: 0.014407
+****
+pass 2, Batch: 116 cost: 0.164398
+****
+pass 2, Batch: 121 cost: 0.084428
+****
+pass 2, Batch: 126 cost: 0.280861
+****
+pass 2, Batch: 131 cost: 0.037022
+****
+pass 2, Batch: 136 cost: 0.029357
+****
+pass 2, Batch: 141 cost: 0.005137
+****
+pass 2, Batch: 146 cost: 0.049176
+****
+pass 2, Batch: 151 cost: 0.011060
+****
+pass 2, Batch: 156 cost: 0.336830
+****
+pass 2, Batch: 161 cost: 0.213210
+****
+pass 2, Batch: 166 cost: 0.074716
+****
+pass 2, Batch: 171 cost: 0.073653
+****
+pass 2, Batch: 176 cost: 0.032340
+****
+pass 2, Batch: 181 cost: 0.024212
+****
+pass 2, Batch: 186 cost: 0.012055
+****
+pass 2, Batch: 191 cost: 0.010677
+****
+pass 2, Batch: 196 cost: 0.148575
+****
+pass 2, Batch: 201 cost: 0.357280
+****
+pass 2, Batch: 206 cost: 0.591462
+****
+pass 2, Batch: 211 cost: 0.222962
+****
+pass 2, Batch: 216 cost: 0.254522
+****
+pass 2, Batch: 221 cost: 0.102858
+****
+pass 2, Batch: 226 cost: 0.006243
+****
+pass 2, Batch: 231 cost: 0.155031
+****
+pass 2, Batch: 236 cost: 0.164098
+****
+pass 2, Batch: 241 cost: 0.191881
+****
+pass 2, Batch: 246 cost: 0.112770
+****
+Test with Pass 2, cost: 0.3955530541
+
+pass 3, Batch: 1 cost: 0.045663
+****
+pass 3, Batch: 6 cost: 0.225416
+****
+pass 3, Batch: 11 cost: 0.055452
+****
+pass 3, Batch: 16 cost: 0.069801
+****
+pass 3, Batch: 21 cost: 0.113379
+****
+pass 3, Batch: 26 cost: 0.043288
+****
+pass 3, Batch: 31 cost: 0.008452
+****
+pass 3, Batch: 36 cost: 0.131073
+****
+pass 3, Batch: 41 cost: 0.036139
+****
+pass 3, Batch: 46 cost: 1.156948
+****
+pass 3, Batch: 51 cost: 0.009351
+****
+pass 3, Batch: 56 cost: 0.017952
+****
+pass 3, Batch: 61 cost: 0.006801
+****
+pass 3, Batch: 66 cost: 0.094272
+****
+pass 3, Batch: 71 cost: 0.311827
+****
+pass 3, Batch: 76 cost: 0.210213
+****
+pass 3, Batch: 81 cost: 0.041605
+****
+pass 3, Batch: 86 cost: 0.023407
+****
+pass 3, Batch: 91 cost: 0.023550
+****
+pass 3, Batch: 96 cost: 0.226952
+****
+pass 3, Batch: 101 cost: 0.159387
+****
+pass 3, Batch: 106 cost: 0.278885
+****
+pass 3, Batch: 111 cost: 0.410498
+****
+pass 3, Batch: 116 cost: 0.028826
+****
+pass 3, Batch: 121 cost: 0.078714
+****
+pass 3, Batch: 126 cost: 0.070617
+****
+pass 3, Batch: 131 cost: 0.042107
+****
+pass 3, Batch: 136 cost: 0.025274
+****
+pass 3, Batch: 141 cost: 0.081148
+****
+pass 3, Batch: 146 cost: 0.141458
+****
+pass 3, Batch: 151 cost: 0.089916
+****
+pass 3, Batch: 156 cost: 0.103347
+****
+pass 3, Batch: 161 cost: 0.501169
+****
+pass 3, Batch: 166 cost: 0.038072
+****
+pass 3, Batch: 171 cost: 0.014435
+****
+pass 3, Batch: 176 cost: 0.016751
+****
+pass 3, Batch: 181 cost: 0.094624
+****
+pass 3, Batch: 186 cost: 0.034960
+****
+pass 3, Batch: 191 cost: 0.004994
+****
+pass 3, Batch: 196 cost: 0.161914
+****
+pass 3, Batch: 201 cost: 0.005114
+****
+pass 3, Batch: 206 cost: 0.282323
+****
+pass 3, Batch: 211 cost: 0.563675
+****
+pass 3, Batch: 216 cost: 0.080287
+****
+pass 3, Batch: 221 cost: 0.017830
+****
+pass 3, Batch: 226 cost: 0.140121
+****
+pass 3, Batch: 231 cost: 0.156119
+****
+pass 3, Batch: 236 cost: 0.133589
+****
+pass 3, Batch: 241 cost: 0.022189
+****
+pass 3, Batch: 246 cost: 0.051100
+****
+Test with Pass 3, cost: 0.373279958028
+
+pass 4, Batch: 1 cost: 0.005796
+****
+pass 4, Batch: 6 cost: 0.099562
+****
+pass 4, Batch: 11 cost: 0.004362
+****
+pass 4, Batch: 16 cost: 0.010694
+****
+pass 4, Batch: 21 cost: 0.012028
+****
+pass 4, Batch: 26 cost: 0.018345
+****
+pass 4, Batch: 31 cost: 0.119755
+****
+pass 4, Batch: 36 cost: 0.265123
+****
+pass 4, Batch: 41 cost: 0.092898
+****
+pass 4, Batch: 46 cost: 0.216388
+****
+pass 4, Batch: 51 cost: 0.058996
+****
+pass 4, Batch: 56 cost: 0.053009
+****
+pass 4, Batch: 61 cost: 0.019012
+****
+pass 4, Batch: 66 cost: 0.006567
+****
+pass 4, Batch: 71 cost: 0.019234
+****
+pass 4, Batch: 76 cost: 0.112561
+****
+pass 4, Batch: 81 cost: 0.533518
+****
+pass 4, Batch: 86 cost: 0.023600
+****
+pass 4, Batch: 91 cost: 0.131085
+****
+pass 4, Batch: 96 cost: 0.091677
+****
+pass 4, Batch: 101 cost: 0.066031
+****
+pass 4, Batch: 106 cost: 0.014013
+****
+pass 4, Batch: 111 cost: 0.003734
+****
+pass 4, Batch: 116 cost: 0.010693
+****
+pass 4, Batch: 121 cost: 0.012197
+****
+pass 4, Batch: 126 cost: 0.021487
+****
+pass 4, Batch: 131 cost: 0.055029
+****
+pass 4, Batch: 136 cost: 0.011108
+****
+pass 4, Batch: 141 cost: 0.151756
+****
+pass 4, Batch: 146 cost: 0.005619
+****
+pass 4, Batch: 151 cost: 0.006763
+****
+pass 4, Batch: 156 cost: 0.190587
+****
+pass 4, Batch: 161 cost: 0.329084
+****
+pass 4, Batch: 166 cost: 0.771399
+****
+pass 4, Batch: 171 cost: 0.009162
+****
+pass 4, Batch: 176 cost: 0.052853
+****
+pass 4, Batch: 181 cost: 0.048040
+****
+pass 4, Batch: 186 cost: 0.307875
+****
+pass 4, Batch: 191 cost: 0.009579
+****
+pass 4, Batch: 196 cost: 0.110344
+****
+pass 4, Batch: 201 cost: 0.034933
+****
+pass 4, Batch: 206 cost: 0.594953
+****
+pass 4, Batch: 211 cost: 0.260396
+****
+pass 4, Batch: 216 cost: 0.040028
+****
+pass 4, Batch: 221 cost: 0.027011
+****
+pass 4, Batch: 226 cost: 0.003265
+****
+pass 4, Batch: 231 cost: 0.343075
+****
+pass 4, Batch: 236 cost: 0.208615
+****
+pass 4, Batch: 241 cost: 0.008269
+****
+pass 4, Batch: 246 cost: 0.029632
+****
+Test with Pass 4, cost: 0.430169322738
+
+pass 5, Batch: 1 cost: 0.010895
+****
+pass 5, Batch: 6 cost: 0.227206
+****
+pass 5, Batch: 11 cost: 0.022445
+****
+pass 5, Batch: 16 cost: 0.003671
+****
+pass 5, Batch: 21 cost: 0.007040
+****
+pass 5, Batch: 26 cost: 0.112662
+****
+pass 5, Batch: 31 cost: 0.005283
+****
+pass 5, Batch: 36 cost: 0.201931
+****
+pass 5, Batch: 41 cost: 0.197639
+****
+pass 5, Batch: 46 cost: 0.299865
+****
+pass 5, Batch: 51 cost: 0.168153
+****
+pass 5, Batch: 56 cost: 0.168931
+****
+pass 5, Batch: 61 cost: 0.015770
+****
+pass 5, Batch: 66 cost: 0.043536
+****
+pass 5, Batch: 71 cost: 0.233396
+****
+pass 5, Batch: 76 cost: 0.067018
+****
+pass 5, Batch: 81 cost: 0.085356
+****
+pass 5, Batch: 86 cost: 0.026090
+****
+pass 5, Batch: 91 cost: 0.129526
+****
+pass 5, Batch: 96 cost: 0.290902
+****
+pass 5, Batch: 101 cost: 0.023517
+****
+pass 5, Batch: 106 cost: 0.329132
+****
+pass 5, Batch: 111 cost: 0.011453
+****
+pass 5, Batch: 116 cost: 0.049666
+****
+pass 5, Batch: 121 cost: 0.006337
+****
+pass 5, Batch: 126 cost: 0.203563
+****
+pass 5, Batch: 131 cost: 0.029802
+****
+pass 5, Batch: 136 cost: 0.005575
+****
+pass 5, Batch: 141 cost: 0.022526
+****
+pass 5, Batch: 146 cost: 0.018723
+****
+pass 5, Batch: 151 cost: 0.014241
+****
+pass 5, Batch: 156 cost: 0.025216
+****
+pass 5, Batch: 161 cost: 0.038804
+****
+pass 5, Batch: 166 cost: 0.004444
+****
+pass 5, Batch: 171 cost: 0.117298
+****
+pass 5, Batch: 176 cost: 0.004479
+****
+pass 5, Batch: 181 cost: 0.180024
+****
+pass 5, Batch: 186 cost: 0.002456
+****
+pass 5, Batch: 191 cost: 0.083861
+****
+pass 5, Batch: 196 cost: 0.040306
+****
+pass 5, Batch: 201 cost: 0.004250
+****
+pass 5, Batch: 206 cost: 3.361674
+****
+pass 5, Batch: 211 cost: 0.080556
+****
+pass 5, Batch: 216 cost: 0.016547
+****
+pass 5, Batch: 221 cost: 0.004783
+****
+pass 5, Batch: 226 cost: 0.003881
+****
+pass 5, Batch: 231 cost: 0.137602
+****
+pass 5, Batch: 236 cost: 0.155281
+****
+pass 5, Batch: 241 cost: 0.003526
+****
+pass 5, Batch: 246 cost: 0.009841
+****
+Test with Pass 5, cost: 0.835438262045

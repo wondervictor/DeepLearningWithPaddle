@@ -156,7 +156,7 @@ def bidirection_rnn(x, size, act):
 # RNN Layers
 def rnn(x):
     x = bidirection_rnn(x, NUM_CLASS+1, paddle.activation.Softmax())
-    #x = bidirection_rnn(x, NUM_CLASS+1, paddle.activation.Softmax())
+    # x = bidirection_rnn(x, NUM_CLASS+1, paddle.activation.Softmax())
     return x
 
 
@@ -206,11 +206,11 @@ def train():
         'image': 0,
         'label': 1
     }
-    # with gzip.open('output/params_pass_0.tar.gz', 'r') as f:
-    parameters = paddle.parameters.create(loss)
+    with gzip.open('output/model_params_pass_7.tar.gz', 'r') as f:
+        parameters = paddle.parameters.Parameters.from_tar(f)
 
     optimizer = paddle.optimizer.RMSProp(
-        learning_rate=0.01,
+        learning_rate=0.001,
         regularization=paddle.optimizer.L2Regularization(rate=8e-4)
     )
 
@@ -279,7 +279,7 @@ def test(x):
         width=IMG_WIDTH
     )
 
-    with gzip.open('output/params_pass_7.tar.gz', 'r') as f:
+    with gzip.open('output/params_pass_2.tar.gz', 'r') as f:
         parameters = paddle.parameters.Parameters.from_tar(f)
     
     output = model(image)
@@ -304,7 +304,16 @@ if __name__ == '__main__':
     # [3, '-', 2, 2, 9, '-', 9, '-', 8, 4]
     # [3, 2, 9, 9, 8, 4]
 
-    data, label = data_reader.test(200)
+    # 202
+    # [8, 6, '-', 6, 5, '-', 5, '-', 9, 9]
+    # [8, 6, 6, 5, 5, 9]
+
+    # 5340
+    #[3, '-', 3, 5, '-', 5, 7, '-', 2, 2]
+    #[3, 3, 5, 5, 7, 2]
+
+
+    data, label = data_reader.test(7800)
 
     data = [[data]]
     res = test(data)
