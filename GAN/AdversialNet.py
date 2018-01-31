@@ -33,6 +33,9 @@ import numpy as np
 # import py_paddle.swig_paddle as api
 
 
+
+
+
 relu = paddle.activation.Relu()
 sigmoid = paddle.activation.Sigmoid()
 

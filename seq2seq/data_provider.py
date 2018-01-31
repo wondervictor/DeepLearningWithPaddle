@@ -60,8 +60,9 @@ def create_reader(is_train=True):
         questions = open_file(question_path)
         answers = open_file(answer_path)
         for i in range(size):
-            yield ([GO_ID]+questions[i]+[EOS_ID]), ([GO_ID]+answers[i]), (answers[i]+[EOS_ID])
-
+            yield ([GO_ID]+questions[i]+[EOS_ID]), \
+                  ([GO_ID]+answers[i]), \
+                  (answers[i]+[EOS_ID])
     return reader
 
 

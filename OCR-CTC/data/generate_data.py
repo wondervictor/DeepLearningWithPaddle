@@ -26,9 +26,21 @@ import matplotlib.pyplot as plt
 
 
 def generate_num():
-    nums = random.randint(1000, 999999)
+    nums = random.randint(1000,99999999)
     code = str(nums)
     label = [int(j) for j in code]
+    return code, label
+
+
+def generate_chars():
+    length = random.randint(4, 8)
+    label = []
+    code = ''
+    for i in range(length):
+        num = random.randint(0, 26)
+        char = chr(num+97)
+        label.append(num)
+        code += char
     return code, label
 
 
@@ -38,7 +50,7 @@ def generate_image(code, captcha):
     img = cv2.imdecode(img, cv2.IMREAD_COLOR)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-    img = cv2.resize(img, (80, 32))
+    img = cv2.resize(img, (100, 32))
     img = np.multiply(img, 1 / 255.0)
     img = np.reshape(img, [-1])
     return img
@@ -51,6 +63,7 @@ def generate_data(training_size, testing_size):
     for i in range(training_size):
         print('generate train image: %s/%s' % (i+1, training_size))
         code, label = generate_num()
+        #code, label = generate_chars()
         img = generate_image(code, captcha)
         train_data.append(img)
         train_label.append(label)
@@ -79,11 +92,13 @@ def generate_data(training_size, testing_size):
 def _test():
     # data = np.load('train_data.npy')
     # label = np.load('train_label.npy')
+    # label = label[48]
+    # img = data[48]
     captcha = ImageCaptcha(fonts=['OpenSans-Regular.ttf'])
 
-    code, label = generate_num()
+    code, label = generate_chars()
     img = generate_image(code, captcha)
-    img = np.reshape(img, [32, 80])
+    img = np.reshape(img, [32, 100])
     print(img[1])
     print(label)
     plt.imshow(img)
@@ -91,5 +106,5 @@ def _test():
 
 
 if __name__ == '__main__':
-    #generate_data(8000, 1000)
-    _test()
+    generate_data(2000, 1000)
+    #_test()

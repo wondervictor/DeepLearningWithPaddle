@@ -31,6 +31,81 @@ IMG_WIDTH = 80
 
 relu = paddle.activation.Relu()
 
+image = paddle.layer.data(
+    name='image',
+    type=paddle.data_type.dense_vector(IMG_HEIGHT * IMG_WIDTH),
+    height=IMG_HEIGHT,
+    width=IMG_WIDTH
+)
+
+
+label = paddle.layer.data(
+    name='label',
+    type=paddle.data_type.integer_value_sequence(NUM_CLASS)
+)
+
+output = model(image)
+
+# CTC LOSS
+loss = paddle.layer.ctc(
+    input=output,
+    label=label,
+    size=NUM_CLASS + 1
+)
+
+
+parameters = paddle.parameters.create(loss)
+
+optimizer = paddle.optimizer.RMSProp(
+    learning_rate=0.01,
+    regularization=paddle.optimizer.L2Regularization(rate=8e-4)
+)
+
+trainer = paddle.trainer.SGD(
+    cost=loss,
+    parameters=parameters,
+    update_equation=optimizer
+)
+
+train_reader = data_reader.create_reader('train')
+
+feeding = {
+    'image': 0,
+    'label': 1
+}
+
+
+def event_handler(event):
+    if isinstance(event, paddle.event.EndIteration):
+        if event.batch_id % 5 == 0:
+            print ("\npass %d, Batch: %d cost: %f"
+                   % (event.pass_id + 1, event.batch_id + 1, event.cost))
+        else:
+            sys.stdout.write('*')
+            sys.stdout.flush()
+    if isinstance(event, paddle.event.EndPass):
+        # save parameters
+        with gzip.open('output/params_pass_%d.tar.gz' % event.pass_id, 'w') as f:
+            parameters.to_tar(f)
+        test_reader = data_reader.create_reader('test')
+        result = trainer.test(
+            reader=paddle.batch(test_reader, batch_size=32),
+            feeding=feeding)
+        print ("\nTest with Pass %d, cost: %s"
+               % (event.pass_id + 1, result.cost))
+
+reader = paddle.batch(
+    reader=train_reader,
+    batch_size=32
+)
+
+trainer.train(
+    reader=reader,
+    feeding=feeding,
+    num_passes=50,
+    event_handler=event_handler
+)
+
 
 # CNN Layers
 def cnn(image):
@@ -155,8 +230,8 @@ def bidirection_rnn(x, size, act):
 
 # RNN Layers
 def rnn(x):
-    x = bidirection_rnn(x, NUM_CLASS+1, paddle.activation.Softmax())
-    # x = bidirection_rnn(x, NUM_CLASS+1, paddle.activation.Softmax())
+    softmax = paddle.activation.Softmax
+    x = bidirection_rnn(x, NUM_CLASS+1, softmax())
     return x
 
 
@@ -206,11 +281,11 @@ def train():
         'image': 0,
         'label': 1
     }
-    with gzip.open('output/model_params_pass_7.tar.gz', 'r') as f:
-        parameters = paddle.parameters.Parameters.from_tar(f)
+
+    parameters = paddle.parameters.create(loss)
 
     optimizer = paddle.optimizer.RMSProp(
-        learning_rate=0.001,
+        learning_rate=0.01,
         regularization=paddle.optimizer.L2Regularization(rate=8e-4)
     )
 
@@ -223,7 +298,8 @@ def train():
     def event_handler(event):
         if isinstance(event, paddle.event.EndIteration):
             if event.batch_id % 5 == 0:
-                print ("\npass %d, Batch: %d cost: %f" % (event.pass_id+1, event.batch_id+1, event.cost))
+                print ("\npass %d, Batch: %d cost: %f"
+                       % (event.pass_id+1, event.batch_id+1, event.cost))
             else:
                 sys.stdout.write('*')
                 sys.stdout.flush()
@@ -235,7 +311,8 @@ def train():
             result = trainer.test(
                 reader=paddle.batch(test_reader, batch_size=32),
                 feeding=feeding)
-            print ("\nTest with Pass %d, cost: %s" % (event.pass_id+1, result.cost))
+            print ("\nTest with Pass %d, cost: %s"
+                   % (event.pass_id+1, result.cost))
 
     train_reader = data_reader.create_reader('train')
     reader = paddle.batch(
@@ -269,7 +346,7 @@ def generate_sequence(x):
     return sequence, prob_sequence
 
 
-def test(x):
+def predict(x):
     paddle.init(use_gpu=False, trainer_count=1)
 
     image = paddle.layer.data(
@@ -279,7 +356,7 @@ def test(x):
         width=IMG_WIDTH
     )
 
-    with gzip.open('output/params_pass_2.tar.gz', 'r') as f:
+    with gzip.open('output/model.tar.gz', 'r') as f:
         parameters = paddle.parameters.Parameters.from_tar(f)
     
     output = model(image)
@@ -298,30 +375,30 @@ def test(x):
 
 if __name__ == '__main__':
 
-    #train()
+    train()
 
     # 200
     # [3, '-', 2, 2, 9, '-', 9, '-', 8, 4]
     # [3, 2, 9, 9, 8, 4]
 
     # 202
-    # [8, 6, '-', 6, 5, '-', 5, '-', 9, 9]
+    # [8, 6, '-', 6, 5, '-', 5, '-', 9, '-']
     # [8, 6, 6, 5, 5, 9]
 
     # 5340
-    #[3, '-', 3, 5, '-', 5, 7, '-', 2, 2]
+    #[3, '-', 3, 5, '-', 5, 7, '-', 2, '-']
     #[3, 3, 5, 5, 7, 2]
 
 
-    data, label = data_reader.test(7800)
-
-    data = [[data]]
-    res = test(data)
-    print(res)
-    res, probs = generate_sequence(res)
-    print(probs)
-    print(res)
-    print(label)
+    # data, label = data_reader.test(7800)
+    #
+    # data = [[data]]
+    # res = test(data)
+    # print(res)
+    # res, probs = generate_sequence(res)
+    # print(probs)
+    # print(res)
+    # print(label)
 
 
 

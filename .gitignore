@@ -104,3 +104,7 @@ output
 
 # MacOS
 .DS_Store
+*.tar.gz
+data
+params
+.ipynb_checkpoints
