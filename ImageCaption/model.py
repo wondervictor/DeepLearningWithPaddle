@@ -2,12 +2,6 @@
 
 import paddle.v2 as paddle
 
-DATA_DIM = 224*224*3
-DICT_DIM = 4529
-image = paddle.layer.data(name="image", type=paddle.data_type.dense_vector(DATA_DIM))
-target = paddle.layer.data(name="target", type=paddle.data_type.integer_value_sequence(DICT_DIM))
-label = paddle.layer.data(name="label", type=paddle.data_type.integer_value_sequence(DICT_DIM))
-
 
 # ResNet
 def conv_bn_layer(input,
@@ -111,6 +105,7 @@ def decoder(features, target, dict_dim, embed_size=512, label=None, is_train=Tru
     else:
         last_word = paddle.layer.last_seq(input=output)
         return last_word
+
 
 # train model
 def train_caption_net(input_images, target, label, dict_dim):

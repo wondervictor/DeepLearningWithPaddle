@@ -138,3 +138,5 @@ def create_reader(is_train):
 
             yield img, [1] + label, label + [2]
 
+    return reader
+
