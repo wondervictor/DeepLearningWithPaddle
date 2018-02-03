@@ -107,4 +107,5 @@ output
 *.tar.gz
 data
 params
+dict
 .ipynb_checkpoints
