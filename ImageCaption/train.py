@@ -20,9 +20,9 @@ paddle.init(use_gpu=False, trainer_count=1)
 def train(epoches):
 
     train_reader = create_reader(True)
-    # test_reader = create_reader(False)
-    train_batch = paddle.batch(reader=paddle.reader.shuffle(train_reader, buf_size=10), batch_size=4)
-    # test_batch = paddle.batch(reader=paddle.reader.shuffle(test_reader, buf_size=10), batch_size=4)
+    test_reader = create_reader(False)
+    train_batch = paddle.batch(reader=paddle.reader.shuffle(train_reader, buf_size=8), batch_size=4)
+    test_batch = paddle.batch(reader=paddle.reader.shuffle(test_reader, buf_size=8), batch_size=4)
 
     feeding = {'image': 0, 'target': 1, 'label': 2}
 
@@ -38,14 +38,14 @@ def train(epoches):
 
     def event_handler(event):
         if isinstance(event, paddle.event.EndIteration):
-            if event.batch_id % 1 == 0:
-                print "\nPass %d, Batch %d, Cost %f, %s" % (
+            if event.batch_id % 2 == 0:
+                print "Pass %d, Batch %d, Cost %f, %s" % (
                     event.pass_id, event.batch_id, event.cost, event.metrics)
         if isinstance(event, paddle.event.EndPass):
             with gzip.open('params_pass_%d.tar.gz' % event.pass_id, 'w') as f:
                 parameters.to_tar(f)
-            result = trainer.test(reader=test_reader)
-            print "\nTest with Pass %d, %s" % (event.pass_id, result.metrics)
+            result = trainer.test(reader=test_batch)
+            print "Test with Pass %d, %s" % (event.pass_id, result.metrics)
 
     trainer = paddle.trainer.SGD(
         cost=cost,
@@ -59,6 +59,7 @@ def train(epoches):
         feeding=feeding,
         num_passes=epoches
     )
+
 
 if __name__ == '__main__':
 

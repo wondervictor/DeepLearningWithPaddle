@@ -19,7 +19,9 @@ def conv_bn_layer(input,
         stride=stride,
         padding=padding,
         act=paddle.activation.Linear(),
-        bias_attr=False)
+        bias_attr=False,
+        param_attr=paddle.attr.Param(is_static=True)
+    )
     return paddle.layer.batch_norm(input=tmp, act=active_type)
 
 
@@ -113,3 +115,10 @@ def train_caption_net(input_images, target, label, dict_dim):
     cost = decoder(features=encoder_, target=target, label=label, dict_dim=dict_dim)
 
     return cost
+
+
+def predict_caption_net(input_images, target, dict_dim):
+    encoder_ = resnet_imagenet(input_images)
+    word = decoder(features=encoder_, target=target, dict_dim=dict_dim, is_train=False)
+    return word
+
