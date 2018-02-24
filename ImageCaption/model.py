@@ -81,7 +81,8 @@ def resnet_imagenet(input, depth=50):
 
 
 # Decoder
-def decoder(features, target, dict_dim, embed_size=512, label=None, is_train=True):
+def decoder(features, target, dict_dim, max_length=30, beam_size=3,decoder_size=512, embed_size=512, label=None, is_train=True):
+
     encoded_features = paddle.layer.fc(
         input=features,
         size=512,
@@ -89,24 +90,64 @@ def decoder(features, target, dict_dim, embed_size=512, label=None, is_train=Tru
         name='encoded_features'
     )
 
-    input_emb = paddle.layer.embedding(target, size=embed_size, name='embedding')
-    input_emb = paddle.layer.fc(input=input_emb, size=512 * 3)
+    def decoder_step(encoded_vector, current_word):
+        decoder_memory = paddle.layer.memory(
+            name="gru_decoder",
+            size=decoder_size,
+            boot_layer=encoded_features
+        )
+        context = encoded_vector
+        decoder_inputs = paddle.layer.fc(input=[context, current_word], size=decoder_size * 3)
 
-    grus = paddle.networks.gru_group(
-        input=[input_emb],
-        memory_boot=encoded_features,
-        size=512,
-        name='gru_group_layer'
-    )
+        gru_step = paddle.layer.gru_step(
+            name="gru_decoder",
+            act=paddle.activation.Tanh(),
+            input=decoder_inputs,
+            output_mem=decoder_memory,
+            size=decoder_size
+        )
 
-    output = paddle.layer.fc(input=grus, size=dict_dim, act=paddle.activation.Softmax())
+        out = paddle.layer.fc(
+            size=dict_dim,
+            bias_attr=True,
+            act=paddle.activation.Softmax(),
+            input=gru_step
+        )
 
+        return out
+
+    group_inputs = [paddle.layer.StaticInput(input=encoded_features)]
     if is_train:
-        cost = paddle.layer.classification_cost(input=output, label=label)
+        # training
+        target_embed = paddle.layer.embedding(target, size=embed_size, name='embedding')
+        group_inputs.append(target_embed)
+
+        decoder_output = paddle.layer.recurrent_group(
+            name='gru_group_decoder',
+            step=decoder_step,
+            input=group_inputs
+        )
+        cost = paddle.layer.classification_cost(input=decoder_output, label=label)
         return cost
     else:
-        last_word = paddle.layer.last_seq(input=output)
-        return last_word
+        # generating
+        target_embed = paddle.layer.GeneratedInput(
+            size=dict_dim,
+            embedding_name='embedding',
+            embedding_size=embed_size
+        )
+        group_inputs.append(target_embed)
+
+        beam_gen = paddle.layer.beam_search(
+            name='gru_group_decoder',
+            step=decoder_step,
+            input=group_inputs,
+            bos_id=0,
+            eos_id=1,
+            beam_size=beam_size,
+            max_length=max_length)
+
+        return beam_gen
 
 
 # train model

@@ -38,7 +38,7 @@ def train(epoches):
 
     def event_handler(event):
         if isinstance(event, paddle.event.EndIteration):
-            if event.batch_id % 2 == 0:
+            if event.batch_id % 4 == 0:
                 print "Pass %d, Batch %d, Cost %f, %s" % (
                     event.pass_id, event.batch_id, event.cost, event.metrics)
         if isinstance(event, paddle.event.EndPass):
