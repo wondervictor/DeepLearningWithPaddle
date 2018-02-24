@@ -41,8 +41,11 @@ def train(epoches):
             if event.batch_id % 4 == 0:
                 print "Pass %d, Batch %d, Cost %f, %s" % (
                     event.pass_id, event.batch_id, event.cost, event.metrics)
+            if event.batch_id % 8 == 0:
+                with gzip.open('params/params_pass_%d.tar.gz' % event.pass_id, 'w') as f:
+                    parameters.to_tar(f)
         if isinstance(event, paddle.event.EndPass):
-            with gzip.open('params_pass_%d.tar.gz' % event.pass_id, 'w') as f:
+            with gzip.open('params/params_pass_%d.tar.gz' % event.pass_id, 'w') as f:
                 parameters.to_tar(f)
             result = trainer.test(reader=test_batch)
             print "Test with Pass %d, %s" % (event.pass_id, result.metrics)

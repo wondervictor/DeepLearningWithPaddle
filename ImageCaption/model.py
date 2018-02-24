@@ -81,7 +81,7 @@ def resnet_imagenet(input, depth=50):
 
 
 # Decoder
-def decoder(features, target, dict_dim, max_length=30, beam_size=3,decoder_size=512, embed_size=512, label=None, is_train=True):
+def decoder(features, dict_dim, target=None, max_length=30, beam_size=3, decoder_size=512, embed_size=512, label=None, is_train=True):
 
     encoded_features = paddle.layer.fc(
         input=features,
@@ -119,7 +119,12 @@ def decoder(features, target, dict_dim, max_length=30, beam_size=3,decoder_size=
     group_inputs = [paddle.layer.StaticInput(input=encoded_features)]
     if is_train:
         # training
-        target_embed = paddle.layer.embedding(target, size=embed_size, name='embedding')
+        target_embed = paddle.layer.embedding(
+            input=target,
+            size=embed_size,
+            name='embedding',
+            param_attr=paddle.attr.ParamAttr(name="embedding")
+        )
         group_inputs.append(target_embed)
 
         decoder_output = paddle.layer.recurrent_group(
@@ -158,8 +163,8 @@ def train_caption_net(input_images, target, label, dict_dim):
     return cost
 
 
-def predict_caption_net(input_images, target, dict_dim):
+def predict_caption_net(input_images, dict_dim):
     encoder_ = resnet_imagenet(input_images)
-    word = decoder(features=encoder_, target=target, dict_dim=dict_dim, is_train=False)
+    word = decoder(features=encoder_, dict_dim=dict_dim, is_train=False)
     return word
 
