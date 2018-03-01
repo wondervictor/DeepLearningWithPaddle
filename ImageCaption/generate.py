@@ -23,6 +23,7 @@ def translate(output, id2word):
     for word in sentence:
         if word == -1:
             p = [id2word[x] for x in tmp]
+            p = p[1:]
             p = filter(remove_eos, p)
             p = ' '.join(p)
             result.append((probs[idx], p))
@@ -43,7 +44,7 @@ def generate(image_path):
     image = paddle.layer.data(name="image", type=paddle.data_type.dense_vector(DATA_DIM))
     output = predict_caption_net(image, DICT_DIM)
 
-    parameters = paddle.parameters.Parameters.from_tar(gzip.open('params/params_pass_0.tar.gz'))
+    parameters = paddle.parameters.Parameters.from_tar(gzip.open('params/params_pass_5.tar.gz'))
 
     with open('dict/id2word.pkl', 'rb') as f:
         id2word = pickle.load(f)
@@ -67,8 +68,9 @@ def generate(image_path):
 
 if __name__ == '__main__':
 
-    generate('109202756_b97fcdc62c.jpg')
-
+    generate('/Users/Vic/Downloads/Flicker8k_Dataset/23445819_3a458716c1.jpg')
+    # generate('/Users/Vic/Dev/DeepLearning/Paddle/DeepLearningWithPaddle/ImageCaption/109202756_b97fcdc62c.jpg')
+    # generate('/Users/Vic/Downloads/Flicker8k_Dataset/10815824_2997e03d76.jpg')
 
 
 

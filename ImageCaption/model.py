@@ -2,7 +2,6 @@
 
 import paddle.v2 as paddle
 
-
 # ResNet
 def conv_bn_layer(input,
                   ch_out,
@@ -81,7 +80,16 @@ def resnet_imagenet(input, depth=50):
 
 
 # Decoder
-def decoder(features, dict_dim, target=None, max_length=30, beam_size=3, decoder_size=512, embed_size=512, label=None, is_train=True):
+def decoder(
+        features,
+        dict_dim,
+        target=None,
+        max_length=30,
+        beam_size=3,
+        decoder_size=512,
+        embed_size=512,
+        label=None,
+        is_train=True):
 
     encoded_features = paddle.layer.fc(
         input=features,
@@ -90,14 +98,13 @@ def decoder(features, dict_dim, target=None, max_length=30, beam_size=3, decoder
         name='encoded_features'
     )
 
-    def decoder_step(encoded_vector, current_word):
+    def decoder_step(current_word):
         decoder_memory = paddle.layer.memory(
             name="gru_decoder",
             size=decoder_size,
             boot_layer=encoded_features
         )
-        context = encoded_vector
-        decoder_inputs = paddle.layer.fc(input=[context, current_word], size=decoder_size * 3)
+        decoder_inputs = paddle.layer.fc(input=current_word, size=decoder_size * 3)
 
         gru_step = paddle.layer.gru_step(
             name="gru_decoder",
@@ -116,7 +123,7 @@ def decoder(features, dict_dim, target=None, max_length=30, beam_size=3, decoder
 
         return out
 
-    group_inputs = [paddle.layer.StaticInput(input=encoded_features)]
+    group_inputs = [] #= [paddle.layer.StaticInput(input=encoded_features)]
     if is_train:
         # training
         target_embed = paddle.layer.embedding(

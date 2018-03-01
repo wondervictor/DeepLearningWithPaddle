@@ -11,7 +11,7 @@ __GO__ = 'GO'
 __EOS__ = 'EOS'
 
 
-# save dict
+# 保存词典
 def save_dict(dict_path, word2id, id2word):
     f = open(dict_path + 'word2id.pkl', 'wb')
     pickle.dump(word2id, f)
@@ -22,7 +22,7 @@ def save_dict(dict_path, word2id, id2word):
     f.close()
 
 
-# load dict
+# 加载词典
 def load_dict(dict_path):
     f = open(dict_path + 'word2id.pkl', 'rb')
     word2id = pickle.load(f)
@@ -33,13 +33,13 @@ def load_dict(dict_path):
     f.close()
     return word2id, id2word
 
-
+# 存储转换的label
 def save_converted_labels(filepath, converted_labels):
     f = open(filepath, 'wb')
     pickle.dump(converted_labels, f)
     f.close()
 
-
+# 加载转换的label
 def load_converted_labels(filepath):
     f = open(filepath, 'rb')
     labels = pickle.load(f)
@@ -51,11 +51,12 @@ def load_converted_labels(filepath):
 def preprocess():
 
     token_file_path = 'data/Flickr8k_text/Flickr8k.token.txt'
-
+    # 读取文件
     with open(token_file_path, 'r') as f:
         lines = f.readlines()
     lines = [x.strip('\n\r') for x in lines]
 
+    # 分离出描述文字
     sentences = dict()
     for line in lines:
         elements = line.split('\t')
@@ -63,7 +64,7 @@ def preprocess():
         if img_name not in sentences:
             sentences[img_name] = elements[1]
 
-    # get
+    # 构建词典
     sentence_words = dict()
     tokens = dict()
     for key in sentences.keys():
@@ -78,13 +79,14 @@ def preprocess():
     # vocabulary
     vocabulary = [__UNK__, __GO__, __EOS__] + sorted(tokens, key=tokens.get, reverse=True)
 
-    # id to word / word to id
+    # 词典/索引 转化
     words2id = {}
     id2words = {}
     for (i, v) in enumerate(vocabulary):
         words2id[v] = i
         id2words[i] = v
 
+    # 将label转为数字label
     result = {}
     for key in sentence_words.keys():
         words = sentence_words[key]
@@ -135,7 +137,6 @@ def create_reader(is_train):
                 is_train=True,
                 is_color=True
             ).flatten().astype('float32')
-
             yield img, [1] + label, label + [2]
 
     return reader
